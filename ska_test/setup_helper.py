@@ -1,8 +1,19 @@
+"""
+Define a test runner command class suitable for use in ``setup.py`` so
+that ``python setup.py test`` runs tests via pytest.
+"""
+
 import sys
 from setuptools.command.test import test as TestCommand
 
+__all__ = ['cmdclass']
+
 
 class PyTest(TestCommand):
+    """
+    Define a test runner command class suitable for use in ``setup.py`` so
+    that ``python setup.py test`` runs tests via pytest.
+    """
     user_options = [('args=', 'a', "Arguments to pass to py.test")]
 
     def initialize_options(self):

@@ -1,5 +1,5 @@
 """
-Provide test() function that can be called from package __init__.
+Provide a test() function that can be called from package __init__.
 """
 
 class TestError(Exception):
@@ -17,16 +17,6 @@ def test(*args, **kwargs):
     If the kwarg ``raise_exception=True`` is provided then any test
     failures will result in an exception being raised.  This can be
     used to make shell-level failure.
-
-    Typical usage is to put the following into a package __init__.py file::
-
-      def test(*args, **kwargs):
-          '''
-          Run py.test unit tests.
-          '''
-          import ska_test
-          return ska_test.test(*args, **kwargs)
-
 
     :returns: number of test failures
     """
