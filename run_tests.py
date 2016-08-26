@@ -94,7 +94,6 @@ def run_tests(package):
     with Ska.File.chdir(in_dir):
         test_files = glob('test*.py') + glob('test*.sh')
         include_test_files = [x for x in test_files if include_test_file(package, x)]
-        print(package, test_files, include_test_files)
 
     skipping = '' if include_test_files else ': skipping - no included tests'
     box_output(['package {}{}'.format(package, skipping)])
