@@ -8,6 +8,7 @@ import sys
 import os
 import shutil
 
+import ska_test
 import Ska.File
 from Chandra.Time import DateTime
 from Ska.Shell import bash, ShellError
@@ -35,6 +36,10 @@ def get_options():
                       )
     parser.add_option("--outputs-subdir",
                       help="Directory containing per-run output package test runs",
+                      )
+    parser.add_option("--regress-dir",
+                      default="regress",
+                      help="Directory containing per-run regression files",
                       )
     parser.add_option("--include",
                       default='*',
@@ -146,6 +151,27 @@ def run_tests(package):
     return statuses
 
 
+def make_regress_files(package):
+    """
+    Copy and potentially clean/modify select output files into the regression
+    outputs directory for ``package``.
+
+    This requires either a file named ``regress_files`` with a list of
+    files or else ``regress_files.py`` which is executed.
+    """
+    out_dir = os.path.join(opt.outputs_dir, opt.outputs_subdir, package)
+    regress_dir = os.path.join(opt.regress_dir, opt.outputs_subdir, package)
+
+    regress_files_path = os.path.join(out_dir, 'regress_files')
+    if os.path.exists(regress_files_path):
+        with open(regress_files_path, 'r') as fh:
+            regress_files = [x.strip() for x in fh.readlines() if x.strip()]
+        ska_test.runner.make_regress_files(regress_files, out_dir, regress_dir)
+    elif os.path.exists(regress_files_path + '.py'):
+        bash('python {}.py --out-dir={} --regress-dir={}'
+             .format(regress_files_path, out_dir, regress_dir))
+
+
 def main():
     global opt
     opt = get_options()
@@ -163,6 +189,7 @@ def main():
         statuses = run_tests(package)
         for test_file, status in statuses:
             results.append((package, test_file, status))
+        make_regress_files(package)
 
     results = Table(rows=results, names=('Package', 'Script', 'Status'))
     box_output(results.pformat())

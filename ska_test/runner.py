@@ -2,6 +2,10 @@
 Provide a test() function that can be called from package __init__.
 """
 
+import os
+import re
+
+
 class TestError(Exception):
     pass
 
@@ -79,3 +83,47 @@ def test(*args, **kwargs):
         raise TestError('got {} failure(s)'.format(n_fail))
 
     return n_fail
+
+
+def make_regress_files(regress_files, out_dir=None, regress_dir=None, clean=None):
+    def get_options():
+        """Get options.
+        Output: optionns"""
+        from optparse import OptionParser
+        parser = OptionParser()
+        parser.set_defaults()
+        parser.add_option("--out-dir")
+        parser.add_option("--regress-dir")
+        return parser.parse_args()[0]
+
+    if clean is None:
+        clean = {}
+
+    if out_dir is None or regress_dir is None:
+        # This is being run via a custom script that is called by run_tests with
+        # --out-dir and --regress-dir options specified.
+        opt = get_options()
+        out_dir = opt.out_dir
+        regress_dir = opt.regress_dir
+
+    # Make the top-level directory where files go
+    if not os.path.exists(regress_dir):
+        os.makedirs(regress_dir)
+
+    for regress_file in regress_files:
+        with open(os.path.join(out_dir, regress_file), 'r') as fh:
+            lines = fh.readlines()
+
+        if regress_file in clean:
+            for sub_in, sub_out in clean[regress_file]:
+                lines = [re.sub(sub_in, sub_out, x) for x in lines]
+
+        # Might need to make output directory since regress_file can
+        # contain directory prefix.
+        regress_path = os.path.join(regress_dir, regress_file)
+        regress_path_dir = os.path.dirname(regress_path)
+        if not os.path.exists(regress_path_dir):
+            os.makedirs(regress_path_dir)
+
+        with open(regress_path, 'w') as fh:
+            fh.writelines(lines)
