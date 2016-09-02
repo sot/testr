@@ -25,11 +25,11 @@ def get_options():
     parser.set_defaults()
 
     parser.add_option("--packages-dir",
-                      default="packages_dir",
+                      default="packages",
                       help="Directory containing package tests",
                       )
     parser.add_option("--outputs-dir",
-                      default="outputs_dir",
+                      default="outputs",
                       help="Root directory containing all output package test runs",
                       )
     parser.add_option("--outputs-subdir",
