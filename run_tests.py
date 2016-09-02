@@ -8,9 +8,7 @@ import sys
 import os
 import shutil
 
-import ska_test
 import Ska.File
-from Chandra.Time import DateTime
 from Ska.Shell import bash, ShellError
 from pyyaks.logger import get_logger
 from astropy.table import Table
