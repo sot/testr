@@ -113,6 +113,8 @@ def collect_tests():
                 test = {'file': test_file,
                         'status': status,
                         'interpreter': interpreter,
+                        'out_dir': out_dir,
+                        'regress_dir': regress_dir,
                         'args': []}
 
                 if test_file == 'copy_regress_files.py':
@@ -139,6 +141,10 @@ def run_tests(package, tests):
 
     # Copy all files for package tests.
     out_dir = os.path.join(opt.outputs_dir, opt.outputs_subdir, package)
+    if os.path.exists(out_dir):
+        logger.info('Removing existing output dir {}'.format(out_dir))
+        shutil.rmtree(out_dir)
+
     logger.info('Copying input tests {} to output dir {}'.format(in_dir, out_dir))
     shutil.copytree(in_dir, out_dir, symlinks=True, ignore=shutil.ignore_patterns('*~'))
 
@@ -175,15 +181,10 @@ def get_results_table(tests):
 def make_test_dir():
     test_dir = os.path.join(opt.outputs_dir, opt.outputs_subdir)
     if os.path.exists(test_dir):
-        answer = raw_input('Removing existing output directory {} (y/N)?'.format(test_dir))
-        if answer.lower() == 'y':
-            logger.info('Removing existing output directory {}'.format(test_dir))
-            shutil.rmtree(test_dir)
-
-    if os.path.exists(test_dir):
-        raise IOError('output dir {} already exists'.format(test_dir))
-
-    os.makedirs(test_dir)
+        logger.info('WARNING: reusing existing output directory {}'.format(test_dir))
+        # TODO: maybe make this a raw_input confirmation in production.
+    else:
+        os.makedirs(test_dir)
 
     # Make a symlink 'last' to the most recent directory
     with Ska.File.chdir(opt.outputs_dir):
