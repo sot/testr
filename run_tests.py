@@ -87,8 +87,8 @@ def box_output(lines, min_width=40):
 
 def include_test_file(package, test_file):
     path = os.path.join(package, test_file)
-    include = any(fnmatch(path, x.strip()) for x in opt.include.split(','))
-    exclude = any(fnmatch(path, x.strip()) for x in opt.exclude.split(','))
+    include = any(fnmatch(path, x.strip() + '*') for x in opt.include.split(','))
+    exclude = any(fnmatch(path, x.strip() + '*') for x in opt.exclude.split(','))
     return include and not exclude
 
 
@@ -108,7 +108,7 @@ def collect_tests():
         regress_dir = os.path.abspath(os.path.join(opt.regress_dir, opt.outputs_subdir, package))
 
         with Ska.File.chdir(in_dir):
-            test_files = glob('test*.py') + glob('test*.sh') + glob('regress_files.py')
+            test_files = glob('test*.py') + glob('test*.sh') + glob('copy_regress_files.py')
             for test_file in test_files:
                 status = 'not run' if include_test_file(package, test_file) else 'skip'
                 interpreter = 'python' if test_file.endswith('.py') else 'bash'
@@ -117,33 +117,13 @@ def collect_tests():
                         'interpreter': interpreter,
                         'args': []}
 
-                if test_file == 'regress_files.py':
+                if test_file == 'copy_regress_files.py':
                     test['args'] = ['--out-dir={}'.format(out_dir),
                                     '--regress-dir={}'.format(regress_dir)]
 
                 tests[package].append(test)
 
-    print(tests)
     return tests
-
-
-def get_out_dir(package):
-    """
-    """
-    out_dir = os.path.join(opt.outputs_dir, opt.outputs_subdir, package)
-
-    if os.path.exists(out_dir):
-        answer = raw_input('Removing existing output directory {} (y/N)?'.format(out_dir))
-        if answer.lower() == 'y':
-            logger.info('Removing existing output directory {}'.format(out_dir))
-            shutil.rmtree(out_dir)
-
-    if os.path.exists(out_dir):
-        raise IOError('output dir {} already exists'.format(out_dir))
-
-    os.makedirs(out_dir)
-
-    return out_dir
 
 
 def run_tests(package, tests):
@@ -185,32 +165,6 @@ def run_tests(package, tests):
                ['{:20s} {}'.format(test['file'], test['status']) for test in tests])
 
 
-def make_regress_files(package):
-    """
-    Copy and potentially clean/modify select output files into the regression
-    outputs directory for ``package``.
-
-    This requires either a file named ``regress_files`` with a list of
-    files or else ``regress_files.py`` which is executed.
-    """
-    out_dir = os.path.join(opt.outputs_dir, opt.outputs_subdir, package)
-    regress_dir = os.path.join(opt.regress_dir, opt.outputs_subdir, package)
-
-    regress_files_path = os.path.join(out_dir, 'regress_files')
-    if os.path.exists(regress_files_path):
-        with open(regress_files_path, 'r') as fh:
-            regress_files = [x.strip() for x in fh.readlines() if x.strip()]
-        try:
-            ska_test.runner.make_regress_files(regress_files, out_dir, regress_dir)
-        except Exception as err:
-            logger.info('Error transferring regression files: {}'.format(err))
-
-
-    elif os.path.exists(regress_files_path + '.py'):
-        bash('python {}.py --out-dir={} --regress-dir={}'
-             .format(regress_files_path, out_dir, regress_dir))
-
-
 def get_results_table(tests):
     results = []
     for package in sorted(tests):
@@ -249,14 +203,12 @@ def main():
         ska_version = bash('ska_version')[0]
         opt.outputs_subdir = ska_version
 
-    make_test_dir()
-
     tests = collect_tests()  # dict of (list of tests) keyed by package
 
     if not opt.collect_only:
+        make_test_dir()
         for package in sorted(tests):
             run_tests(package, tests[package])  # updates tests[package] in place
-            make_regress_files(package)
 
     results = get_results_table(tests)
     box_output(results.pformat())
