@@ -53,6 +53,12 @@ def get_options():
                       action="store_true",
                       help=('Collect tests but do not run'),
                       )
+    parser.add_option("--packages-repo",
+                      default='git@github.com:/sot',
+                      help=("Base URL for package git repos"),
+                      )
+
+
 
     return parser.parse_args()[0]
 
@@ -158,10 +164,11 @@ def run_tests(package, tests):
 
             try:
                 cmd = ' '.join([interpreter, test['file']] + test['args'])
-                bash(cmd, logfile=logfile)
+                bash(cmd, logfile=logfile, env={'PACKAGE': package,
+                                                'PACKAGES_REPO': opt.packages_repo})
             except ShellError:
                 # Test process returned a non-zero status => Fail
-                test['status'] = 'fail'
+                test['status'] = 'FAIL'
             else:
                 test['status'] = 'pass'
 
