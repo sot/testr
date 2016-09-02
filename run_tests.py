@@ -14,7 +14,7 @@ from pyyaks.logger import get_logger
 from astropy.table import Table
 
 opt = None
-logger = get_logger(name='run_tests')
+logger = None
 
 
 def get_options():
@@ -114,7 +114,7 @@ def collect_tests():
         with Ska.File.chdir(in_dir):
             test_files = glob('test*.py') + glob('test*.sh') + glob('copy_regress_files.py')
             for test_file in test_files:
-                status = 'not run' if include_test_file(package, test_file) else 'skip'
+                status = 'not run' if include_test_file(package, test_file) else 'Skip'
                 interpreter = 'python' if test_file.endswith('.py') else 'bash'
                 test = {'file': test_file,
                         'status': status,
@@ -136,7 +136,7 @@ def run_tests(package, tests):
     # Collect test scripts in package and find the ones that are included
     in_dir = os.path.join(opt.packages_dir, package)
 
-    include_tests = [test for test in tests if test['status'] != 'skip']
+    include_tests = [test for test in tests if test['status'] != 'Skip']
     skipping = '' if include_tests else ': skipping - no included tests'
     box_output(['package {}{}'.format(package, skipping)])
 
@@ -170,7 +170,7 @@ def run_tests(package, tests):
                 # Test process returned a non-zero status => Fail
                 test['status'] = 'FAIL'
             else:
-                test['status'] = 'pass'
+                test['status'] = 'Pass'
 
     box_output(['{} Test Summary'.format(package)] +
                ['{:20s} {}'.format(test['file'], test['status']) for test in tests])
@@ -188,8 +188,9 @@ def get_results_table(tests):
 def make_test_dir():
     test_dir = os.path.join(opt.outputs_dir, opt.outputs_subdir)
     if os.path.exists(test_dir):
-        logger.info('WARNING: reusing existing output directory {}'.format(test_dir))
-        # TODO: maybe make this a raw_input confirmation in production.
+        print('WARNING: reusing existing output directory {}'.format(test_dir))
+        # TODO: maybe make this a raw_input confirmation in production.  Note:
+        # logger doesn't exist yet since it logs into test_dir.
     else:
         os.makedirs(test_dir)
 
@@ -199,9 +200,11 @@ def make_test_dir():
             os.unlink('last')
         os.symlink(opt.outputs_subdir, 'last')
 
+    return test_dir
+
 
 def main():
-    global opt
+    global opt, logger
     opt = get_options()
 
     # Set up directories
@@ -209,10 +212,15 @@ def main():
         ska_version = bash('ska_version')[0]
         opt.outputs_subdir = ska_version
 
+    test_dir = make_test_dir()
+
+    # TODO: back-version existing test.log file to test.log.N where N is the first
+    # available number.
+    logger = get_logger(name='run_tests', filename=os.path.join(test_dir, 'test.log'))
+
     tests = collect_tests()  # dict of (list of tests) keyed by package
 
     if not opt.collect_only:
-        make_test_dir()
         for package in sorted(tests):
             run_tests(package, tests[package])  # updates tests[package] in place
 
