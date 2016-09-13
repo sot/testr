@@ -92,7 +92,10 @@ def box_output(lines, min_width=40):
 def include_test_file(package, test_file):
     path = os.path.join(package, test_file)
     include = any(fnmatch(path, x.strip() + '*') for x in opt.include.split(','))
-    exclude = any(fnmatch(path, x.strip() + '*') for x in opt.exclude.split(','))
+    if opt.exclude:
+        exclude = any(fnmatch(path, x.strip() + '*') for x in opt.exclude.split(','))
+    else:
+        exclude = False
     return include and not exclude
 
 
@@ -114,7 +117,7 @@ def collect_tests():
         with Ska.File.chdir(in_dir):
             test_files = glob('test*.py') + glob('test*.sh') + glob('copy_regress_files.py')
             for test_file in test_files:
-                status = 'not run' if include_test_file(package, test_file) else 'Skip'
+                status = 'not run' if include_test_file(package, test_file) else '----'
                 interpreter = 'python' if test_file.endswith('.py') else 'bash'
                 test = {'file': test_file,
                         'status': status,
@@ -136,7 +139,7 @@ def run_tests(package, tests):
     # Collect test scripts in package and find the ones that are included
     in_dir = os.path.join(opt.packages_dir, package)
 
-    include_tests = [test for test in tests if test['status'] != 'Skip']
+    include_tests = [test for test in tests if test['status'] != '----']
     skipping = '' if include_tests else ': skipping - no included tests'
     box_output(['package {}{}'.format(package, skipping)])
 
@@ -170,7 +173,7 @@ def run_tests(package, tests):
                 # Test process returned a non-zero status => Fail
                 test['status'] = 'FAIL'
             else:
-                test['status'] = 'Pass'
+                test['status'] = 'pass'
 
     box_output(['{} Test Summary'.format(package)] +
                ['{:20s} {}'.format(test['file'], test['status']) for test in tests])
