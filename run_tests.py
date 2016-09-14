@@ -9,7 +9,7 @@ import os
 import shutil
 
 import Ska.File
-from Ska.Shell import bash, ShellError
+from Ska.Shell import bash, ShellError, Spawn
 from pyyaks.logger import get_logger
 from astropy.table import Table
 
@@ -57,9 +57,10 @@ def get_options():
                       default='git@github.com:/sot',
                       help=("Base URL for package git repos"),
                       )
-
-
-
+    parser.add_option("--overwrite",
+                      action="store_true",
+                      help=('Overwrite existing outputs directory instead of deleting'),
+                      )
     return parser.parse_args()[0]
 
 
@@ -150,12 +151,12 @@ def run_tests(package, tests):
 
     # Copy all files for package tests.
     out_dir = os.path.join(opt.outputs_dir, opt.outputs_subdir, package)
-    if os.path.exists(out_dir):
+    if not opt.overwrite and os.path.exists(out_dir):
         logger.info('Removing existing output dir {}'.format(out_dir))
         shutil.rmtree(out_dir)
 
     logger.info('Copying input tests {} to output dir {}'.format(in_dir, out_dir))
-    shutil.copytree(in_dir, out_dir, symlinks=True, ignore=shutil.ignore_patterns('*~'))
+    Spawn().run(['rsync', '-a', in_dir + '/', out_dir, '--exclude=*~'])
 
     # Now run the tests and collect test status
     with Ska.File.chdir(out_dir):
