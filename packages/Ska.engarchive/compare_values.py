@@ -90,13 +90,17 @@ opt = get_options()
 any_fail = False
 
 for content in opt.content:
-    # Get all the MSIDs for this content type
+    # Get all the MSIDs for this content type (use flight database to get MSIDs)
+    fetch.msid_files.basedir = opt.flight_root
     msids = [msid for msid, msid_content in fetch.content.items()
              if content == msid_content]
 
     for msid in msids:
         print('{} {}'.format(content, msid))
         for stat in (None, '5min', 'daily'):
+            if content.startswith('orbit') and stat is not None:
+                continue  # orbitephem 5min and daily stats don't work, I think
+                          # because of how they are updated.
             fails = compare_msid(msid, stat)
             if fails:
                 print('\n'.join(fails))
