@@ -1,6 +1,6 @@
 # Test creating new engineering archive database and compare to flight data
 
-git clone ${PACKAGES_REPO}/eng_archive
+/usr/bin/git clone ${PACKAGES_REPO}/eng_archive
 cd eng_archive
 git checkout create-faster
 cp update_archive.py add_derived.py archfiles_def.sql ../

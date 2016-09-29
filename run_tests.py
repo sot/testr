@@ -54,7 +54,7 @@ def get_options():
                       help=('Collect tests but do not run'),
                       )
     parser.add_option("--packages-repo",
-                      default='git@github.com:/sot',
+                      default='https://github.com/sot',
                       help=("Base URL for package git repos"),
                       )
     parser.add_option("--overwrite",
