@@ -13,21 +13,11 @@ rm -rf kadi
 export KADI=$PWD
 ./manage.py syncdb --noinput
 
-START=`python -c 'from Chandra.Time import DateTime; print((DateTime() - 60).date)'`
-STOP=`python -c 'from Chandra.Time import DateTime; print((DateTime() - 30).date)'`
+START='2015:001'
+STOP='2015:030'
 
 ./update_events --start=$START --stop=$STOP
 ./update_cmds --start=$START --stop=$STOP
 
 # Write event and commands data using test database
-./write_events_cmds.py --start=$START --stop=$START --data-root=test
-
-# Write event and commands data using flight database
-unset KADI
-./write_events_cmds.py --start=$START --stop=$START --data-root=flight
-
-echo "Diffing files from test and flight databases"
-diff -r test flight
-
-
-
+./write_events_cmds.py --start=$START --stop=$START --data-root=events_cmds
