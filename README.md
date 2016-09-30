@@ -1,2 +1,3 @@
-# ska_test
-Testing framework for Ska runtime environment
+# testr
+
+Testing framework for unit and regression testing
