@@ -1,20 +1,21 @@
 from setuptools import setup
 
-from ska_test import __version__
+from testr import __version__
 
 try:
-    from ska_test import cmdclass
+    from testr import cmdclass
 except ImportError:
     cmdclass = {}
 
 
-setup(name='ska_test',
+setup(name='testr',
       author='Tom Aldcroft',
-      description='Testing framework for Ska runtime environment',
+      description='Framework for unit and integration testing of packages',
       author_email='taldcroft@cfa.harvard.edu',
       version=__version__,
       zip_safe=False,
-      packages=['ska_test'],
+      packages=['testr'],
       tests_require=['pytest'],
       cmdclass=cmdclass,
       )
+ 
