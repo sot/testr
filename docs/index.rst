@@ -1,7 +1,7 @@
-ska_test
+testr
 ===========
 
-The ska_test package provides a Testing framework for the Ska runtime environment.
+The testr package provides a Testing framework for the Ska runtime environment.
 
 .. toctree::
    :maxdepth: 2
@@ -9,7 +9,7 @@ The ska_test package provides a Testing framework for the Ska runtime environmen
 Testing helpers
 ---------------
 
-The modules ``ska_test.runner`` and ``ska_test.setup_helper`` provide the infrastructure
+The modules ``testr.runner`` and ``testr.setup_helper`` provide the infrastructure
 to enable easy and uniform running of pytest test functions in two ways:
 
 - By importing the package (locally or installed) and doing ``<package>.test(*args, **kwargs)``
@@ -25,8 +25,8 @@ Typical usage within the package ``__init__.py`` file::
       '''
       Run py.test unit tests.
       '''
-      import ska_test
-      return ska_test.test(*args, **kwargs)
+      import testr
+      return testr.test(*args, **kwargs)
 
 
 ``setup.py``
@@ -37,7 +37,7 @@ Typical usage in ``setup.py``::
   from setuptools import setup
 
   try:
-      from ska_test.setup_helper import cmdclass
+      from testr.setup_helper import cmdclass
   except ImportError:
       cmdclass = {}
 
@@ -51,14 +51,14 @@ Typical usage in ``setup.py``::
 API
 ---
 
-ska_test.runner
+testr.runner
 ^^^^^^^^^^^^^^^
 
-.. automodule:: ska_test.runner
+.. automodule:: testr.runner
    :members:
 
-ska_test.setup_helper
+testr.setup_helper
 ^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: ska_test.setup_helper
+.. automodule:: testr.setup_helper
    :members:

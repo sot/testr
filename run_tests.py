@@ -1,5 +1,3 @@
-#! /usr/bin/env python
-
 from __future__ import print_function, absolute_import, division
 
 from glob import glob
@@ -18,8 +16,11 @@ logger = None
 
 
 def get_options():
-    """Get options.
-    Output: optionns"""
+    """
+    Get options.
+
+    :returns: options (argparse object)
+    """
     from optparse import OptionParser
     parser = OptionParser()
     parser.set_defaults()
@@ -230,6 +231,3 @@ def main():
 
     results = get_results_table(tests)
     box_output(results.pformat())
-
-if __name__ == '__main__':
-    main()
