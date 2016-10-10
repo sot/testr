@@ -117,20 +117,25 @@ def collect_tests():
         regress_dir = os.path.abspath(os.path.join(opt.regress_dir, opt.outputs_subdir, package))
 
         with Ska.File.chdir(in_dir):
-            test_files = glob('test*.py') + glob('test*.sh') + glob('copy_regress_files.py')
+            test_files = sorted(glob('test_*')) + sorted(glob('post_*'))
+
             for test_file in test_files:
                 status = 'not run' if include_test_file(package, test_file) else '----'
-                interpreter = 'python' if test_file.endswith('.py') else 'bash'
+
+                if test_file.endswith('.py'):
+                    interpreter = 'python'
+                elif test_file.endswith('.sh'):
+                    interpreter = 'bash'
+                else:
+                    interpreter = None
+
                 test = {'file': test_file,
                         'status': status,
                         'interpreter': interpreter,
                         'out_dir': out_dir,
                         'regress_dir': regress_dir,
-                        'args': []}
-
-                if test_file == 'copy_regress_files.py':
-                    test['args'] = ['--out-dir={}'.format(out_dir),
-                                    '--regress-dir={}'.format(regress_dir)]
+                        'packages_repo': opt.packages_repo,
+                        'package': package}
 
                 tests[package].append(test)
 
@@ -162,15 +167,29 @@ def run_tests(package, tests):
     # Now run the tests and collect test status
     with Ska.File.chdir(out_dir):
         for test in include_tests:
+            # Make the test keys available in the environment
+            env = {'TESTR_{}'.format(str(key).upper()): val
+                   for key, val in test.items()}
+
             interpreter = test['interpreter']
 
             logger.info('Running {} {} script'.format(interpreter, test['file']))
             logfile = Tee(test['file'] + '.log')
 
+            # Set up the right command for bash.  In the case of a bash script the
+            # cmd is the actual bash lines as a single string.  In this way each one
+            # gets echoed and run so that an intermediate failure is caught.  For
+            # no interpreter assume the file is executable.
+            if interpreter == 'bash':
+                with open(test['file'], 'r') as fh:
+                    cmd = fh.read()
+            elif interpreter is None:
+                cmd = './' + test['file']
+            else:
+                cmd = interpreter + ' ' + test['file']
+
             try:
-                cmd = ' '.join([interpreter, test['file']] + test['args'])
-                bash(cmd, logfile=logfile, env={'PACKAGE': package,
-                                                'PACKAGES_REPO': opt.packages_repo})
+                bash(cmd, logfile=logfile, env=env)
             except ShellError:
                 # Test process returned a non-zero status => Fail
                 test['status'] = 'FAIL'

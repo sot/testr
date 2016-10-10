@@ -123,25 +123,29 @@ def test(*args, **kwargs):
 
 
 def make_regress_files(regress_files, out_dir=None, regress_dir=None, clean=None):
-    def get_options():
-        """Get options.
-        Output: optionns"""
-        from optparse import OptionParser
-        parser = OptionParser()
-        parser.set_defaults()
-        parser.add_option("--out-dir")
-        parser.add_option("--regress-dir")
-        return parser.parse_args()[0]
+    """
+    Copy ``regress_files`` from ``out_dir`` to ``regress_dir``, maintaining the
+    relative directory structure.
 
+    The ``clean`` parameter specifies a dict of rules for "cleaning" files so that
+    uninteresting diffs are eliminated.  Each dict key is the path name (corresponding
+    to ``regress_files``) and the value is a 2-tuple of (match_regex, substitution_string).
+
+    :param regress_files: list of relative path names
+    :param out_dir: top-level directory for source of files
+    :param regress_dir: top-level directory where files are copied
+    :param clean: dict of regex substitution rules
+
+    :returns: None
+    """
     if clean is None:
         clean = {}
 
-    if out_dir is None or regress_dir is None:
-        # This is being run via a custom script that is called by run_tests with
-        # --out-dir and --regress-dir options specified.
-        opt = get_options()
-        out_dir = opt.out_dir
-        regress_dir = opt.regress_dir
+    # Fall back on environment variables that are defined during package testing.
+    if out_dir is None:
+        out_dir = os.environ.get('TESTR_OUT_DIR')
+    if regress_dir is None:
+        regress_dir = os.environ.get('TESTR_REGRESS_DIR')
 
     # Make the top-level directory where files go
     if not os.path.exists(regress_dir):
