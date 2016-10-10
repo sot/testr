@@ -10,6 +10,31 @@ class TestError(Exception):
     pass
 
 
+def testr(*args, **kwargs):
+    """
+    Run py.test unit tests for the calling package.  This just calls the ``test()``
+    function but includes defaults that are more appropriate for integrated package
+    testing using run_testr.
+
+    :param *args: positional args to pass to pytest
+    :param raise_exception: test failures raise an exception (default=True)
+    :param package_from_dir: set package name from parent directory name (default=True)
+    :param verbose: run pytest in verbose (-v) mode (default=True)
+    :param show_output: run pytest in show output (-s) mode (default=True)
+    :param **kwargs: additional keyword args to pass to pytest
+
+    :returns: number of test failures
+    """
+    for kwarg in ('raise_exception', 'package_from_dir', 'verbose', 'show_output'):
+        kwargs.setdefault(kwarg, True)
+
+    # test() function looks up the calling stack to find the calling package name.
+    # It will be two levels up.
+    kwargs['stack_level'] = 2
+
+    return test(*args, **kwargs)
+
+
 def test(*args, **kwargs):
     """
     Run py.test unit tests for the calling package with specified
@@ -20,7 +45,14 @@ def test(*args, **kwargs):
 
     If the kwarg ``raise_exception=True`` is provided then any test
     failures will result in an exception being raised.  This can be
-    used to make shell-level failure.
+    used to make a shell-level failure.
+
+    :param *args: positional args to pass to pytest
+    :param raise_exception: test failures raise an exception (default=False)
+    :param package_from_dir: set package name from parent directory name (default=False)
+    :param verbose: run pytest in verbose (-v) mode (default=False)
+    :param show_output: run pytest in show output (-s) mode (default=False)
+    :param **kwargs: additional keyword args to pass to pytest
 
     :returns: number of test failures
     """
@@ -51,7 +83,13 @@ def test(*args, **kwargs):
     raise_exception = kwargs.pop('raise_exception', False)
     package_from_dir = kwargs.pop('package_from_dir', False)
 
-    calling_frame_record = inspect.stack()[1]  # Only works for stack-based Python
+    if kwargs.pop('verbose', False) and '-v' not in args:
+        args = args + ('-v',)
+    if kwargs.pop('show_output', False) and '-s' not in args:
+        args = args + ('-s',)
+
+    stack_level = kwargs.pop('stack_level', 1)
+    calling_frame_record = inspect.stack()[stack_level]  # Only works for stack-based Python
     calling_func_file = calling_frame_record[1]
 
     if package_from_dir:
@@ -61,7 +99,6 @@ def test(*args, **kwargs):
         # so we have to import the package to get its parent directory.
         import importlib
         package = os.path.basename(os.path.dirname(os.path.abspath(calling_func_file)))
-        print('package', package)
         module = importlib.import_module(package)
         calling_func_file = module.__file__
         calling_func_module = module.__name__
