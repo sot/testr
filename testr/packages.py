@@ -119,6 +119,7 @@ def collect_tests():
 
         with Ska.File.chdir(in_dir):
             test_files = sorted(glob('test_*')) + sorted(glob('post_*'))
+            test_files = [x for x in test_files if x.endswith('.py') or x.endswith('.sh')]
 
             for test_file in test_files:
                 status = 'not run' if include_test_file(package, test_file) else '----'
@@ -282,7 +283,7 @@ def main():
 
     # Set up directories
     if opt.outputs_subdir is None:
-        ska_version = bash('ska_version')[0]
+        ska_version = bash('./get_version_id')[0]
         opt.outputs_subdir = ska_version
 
     test_dir = make_test_dir()
