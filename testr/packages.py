@@ -277,6 +277,47 @@ def make_regress_files(regress_files, out_dir=None, regress_dir=None, clean=None
             fh.writelines(lines)
 
 
+def check_files(filename, checks, allows=None, out_dir=None):
+    """
+    Search for ``checks`` regexes in the output ``filename`` (which may be a glob).
+
+    The ``allows`` parameter specifies a list of regexes that are known/accepted check
+    failures and can be ignored even if the line matches a check.  The default bash prompt
+    Bash-HH:MM:SS> is always allowed, so no lines that are part of the source bash
+    commanding will be flagged.
+
+    If any matches are found then a ValueError exception is raised.
+
+    :param filename: relative path name (glob allowed)
+    :param checks: list of regexes to try matching
+    :param allows: list of regexes that override checks
+
+    :returns: None
+    """
+    if allows is None:
+        allows = []
+
+    allows.append(r'^Bash-\d\d')
+
+    if out_dir is None:
+        out_dir = os.environ.get('TESTR_OUT_DIR')
+
+    matches = []
+    for filename in glob(filename):
+        with open(os.path.join(out_dir, filename), 'r') as fh:
+            lines = fh.readlines()
+
+        for check in checks:
+            for index, line in enumerate(lines):
+                if re.search(check, line, re.IGNORECASE):
+                    if not any(re.search(allow, line) for allow in allows):
+                        matches.append('{!r} matched at {}:{} :: {}'
+                                       .format(check, filename, index, line.strip()))
+
+    if matches:
+        raise ValueError('Found matches in check_files:\n{}'.format('\n'.join(matches)))
+
+
 def main():
     global opt, logger
     opt = get_options()
@@ -299,4 +340,4 @@ def main():
             run_tests(package, tests[package])  # updates tests[package] in place
 
     results = get_results_table(tests)
-    box_output(results.pformat())
+    box_output(results.pformat(max_lines=-1, max_width=-1))
