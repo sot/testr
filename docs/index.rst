@@ -364,7 +364,8 @@ doing a complex regression test that requires some setup and uses
 several scripts to regenerate database tables from scratch.  It then
 uses a helper script those to write a subset of database contents
 in a clean ASCII format for regression comparisons.  This is in the
-`kadi <https://github.com/sot/ska_testr/tree/master/packages/kadi>` package.
+`kadi <https://github.com/sot/ska_testr/tree/master/packages/kadi>`_ package.
+::
 
   # Get three launcher scripts manage.py update_events and update_cmds
   /usr/bin/git clone ${TESTR_PACKAGES_REPO}/kadi
@@ -388,7 +389,7 @@ in a clean ASCII format for regression comparisons.  This is in the
   ./write_events_cmds.py --start=$START --stop=$START --data-root=events_cmds
 
 Another complicated example is in the
-`Ska.engarchive <https://github.com/sot/ska_testr/tree/master/packages/Ska.engarchive>`
+`Ska.engarchive <https://github.com/sot/ska_testr/tree/master/packages/Ska.engarchive>`_
 package.  This one is slightly different because it generates new database
 values and then immediately compares with the current production database.
 
