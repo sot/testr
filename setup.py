@@ -15,6 +15,7 @@ setup(name='testr',
       version=__version__,
       zip_safe=False,
       packages=['testr'],
+      entry_points={'console_scripts': ['run_testr=testr.packages:main']},
       tests_require=['pytest'],
       cmdclass=cmdclass,
       )
