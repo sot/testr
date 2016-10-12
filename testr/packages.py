@@ -47,9 +47,8 @@ def get_options():
                             "list of glob pattern(s) (default='*')"),
                       )
     parser.add_option("--exclude",
-                      default='*_long',
                       help=("Exclude tests that match comma-separated "
-                            "list of glob pattern(s) (default='*_long')"),
+                            "list of glob pattern(s) (default=None)"),
                       )
     parser.add_option("--collect-only",
                       action="store_true",
@@ -214,7 +213,7 @@ def get_results_table(tests):
 def make_test_dir():
     test_dir = os.path.join(opt.outputs_dir, opt.outputs_subdir)
     if os.path.exists(test_dir):
-        print('WARNING: reusing existing output directory {}'.format(test_dir))
+        print('WARNING: reusing existing output directory {}\n'.format(test_dir))
         # TODO: maybe make this a raw_input confirmation in production.  Note:
         # logger doesn't exist yet since it logs into test_dir.
     else:
