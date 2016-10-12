@@ -16,12 +16,12 @@ def testr(*args, **kwargs):
     function but includes defaults that are more appropriate for integrated package
     testing using run_testr.
 
-    :param *args: positional args to pass to pytest
+    :param \*args: positional args to pass to pytest
     :param raise_exception: test failures raise an exception (default=True)
     :param package_from_dir: set package name from parent directory name (default=True)
     :param verbose: run pytest in verbose (-v) mode (default=True)
     :param show_output: run pytest in show output (-s) mode (default=True)
-    :param **kwargs: additional keyword args to pass to pytest
+    :param \*\*kwargs: additional keyword args to pass to pytest
 
     :returns: number of test failures
     """
@@ -47,12 +47,12 @@ def test(*args, **kwargs):
     failures will result in an exception being raised.  This can be
     used to make a shell-level failure.
 
-    :param *args: positional args to pass to pytest
+    :param \*args: positional args to pass to pytest
     :param raise_exception: test failures raise an exception (default=False)
     :param package_from_dir: set package name from parent directory name (default=False)
     :param verbose: run pytest in verbose (-v) mode (default=False)
     :param show_output: run pytest in show output (-s) mode (default=False)
-    :param **kwargs: additional keyword args to pass to pytest
+    :param \*\*kwargs: additional keyword args to pass to pytest
 
     :returns: number of test failures
     """
