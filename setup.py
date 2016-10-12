@@ -12,6 +12,7 @@ setup(name='testr',
       author='Tom Aldcroft',
       description='Framework for unit and integration testing of packages',
       author_email='taldcroft@cfa.harvard.edu',
+      url='http://cxc.harvard.edu/mta/ASPECT/tool_doc/testr',
       version=__version__,
       zip_safe=False,
       packages=['testr'],
@@ -19,4 +20,3 @@ setup(name='testr',
       tests_require=['pytest'],
       cmdclass=cmdclass,
       )
- 
