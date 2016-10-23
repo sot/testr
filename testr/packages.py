@@ -22,47 +22,54 @@ def get_options():
 
     :returns: options (argparse object)
     """
-    from optparse import OptionParser
-    parser = OptionParser()
+    from argparse import ArgumentParser
+    parser = ArgumentParser()
+
+    parser.add_argument("--test-spec",
+                        help="Test include/exclude specification (default=None)",
+                        )
+    parser.add_argument("--packages-dir",
+                        default="packages",
+                        help="Directory containing package tests",
+                        )
+    parser.add_argument("--outputs-dir",
+                        default="outputs",
+                        help="Root directory containing all output package test runs",
+                        )
+    parser.add_argument("--outputs-subdir",
+                        help="Directory containing per-run output package test runs",
+                        )
+    parser.add_argument("--regress-dir",
+                        default="regress",
+                        help="Directory containing per-run regression files",
+                        )
+    parser.add_argument('--include',
+                        action='append',
+                        default=[],
+                        dest='includes',
+                        help=("Include tests that match glob pattern"),
+                        )
+    parser.add_argument('--exclude',
+                        action='append',
+                        default=[],
+                        dest='excludes',
+                        help=("Exclude tests that match glob pattern"),
+                        )
+    parser.add_argument("--collect-only",
+                        action="store_true",
+                        help=('Collect tests but do not run'),
+                        )
+    parser.add_argument("--packages-repo",
+                        default='https://github.com/sot',
+                        help=("Base URL for package git repos"),
+                        )
+    parser.add_argument("--overwrite",
+                        action="store_true",
+                        help=('Overwrite existing outputs directory instead of deleting'),
+                        )
     parser.set_defaults()
 
-    parser.add_option("--packages-dir",
-                      default="packages",
-                      help="Directory containing package tests",
-                      )
-    parser.add_option("--outputs-dir",
-                      default="outputs",
-                      help="Root directory containing all output package test runs",
-                      )
-    parser.add_option("--outputs-subdir",
-                      help="Directory containing per-run output package test runs",
-                      )
-    parser.add_option("--regress-dir",
-                      default="regress",
-                      help="Directory containing per-run regression files",
-                      )
-    parser.add_option("--include",
-                      default='*',
-                      help=("Include tests that match comma-separated "
-                            "list of glob pattern(s) (default='*')"),
-                      )
-    parser.add_option("--exclude",
-                      help=("Exclude tests that match comma-separated "
-                            "list of glob pattern(s) (default=None)"),
-                      )
-    parser.add_option("--collect-only",
-                      action="store_true",
-                      help=('Collect tests but do not run'),
-                      )
-    parser.add_option("--packages-repo",
-                      default='https://github.com/sot',
-                      help=("Base URL for package git repos"),
-                      )
-    parser.add_option("--overwrite",
-                      action="store_true",
-                      help=('Overwrite existing outputs directory instead of deleting'),
-                      )
-    return parser.parse_args()[0]
+    return parser.parse_args()
 
 
 class Tee(object):
@@ -93,11 +100,9 @@ def box_output(lines, min_width=40):
 
 def include_test_file(package, test_file):
     path = os.path.join(package, test_file)
-    include = any(fnmatch(path, x.strip() + '*') for x in opt.include.split(','))
-    if opt.exclude:
-        exclude = any(fnmatch(path, x.strip() + '*') for x in opt.exclude.split(','))
-    else:
-        exclude = False
+    include = any(fnmatch(path, x.strip() + '*') for x in opt.includes)
+    exclude = any(fnmatch(path, x.strip() + '*') for x in opt.excludes)
+
     return include and not exclude
 
 
@@ -317,14 +322,42 @@ def check_files(filename, checks, allows=None, out_dir=None):
         raise ValueError('Found matches in check_files:\n{}'.format('\n'.join(matches)))
 
 
-def main():
-    global opt, logger
-    opt = get_options()
-
+def process_opt():
+    """
+    Process options and make various inplace replacements for downstream
+    convenience.
+    """
     # Set up directories
     if opt.outputs_subdir is None:
         ska_version = bash('./get_version_id')[0]
         opt.outputs_subdir = ska_version
+
+    if opt.test_spec:
+        # This puts regression outputs into a separate sub-directory
+        # and reads additional test file include/excludes.
+        opt.regress_dir = os.path.join(opt.regress_dir, opt.test_spec)
+
+        with open('test_spec_{}'.format(opt.test_spec), 'r') as fh:
+            specs = (line.strip() for line in fh)
+            specs = [spec for spec in specs if spec and not spec.startswith('#')]
+
+        for spec in specs:
+            if spec:
+                if spec.startswith('-'):
+                    opt.excludes.append(spec[1:])
+                else:
+                    opt.includes.append(spec)
+
+    # If opt.includes is not expicitly initialized after processing test_spec (which is
+    # optional) then use ['*'] to include all tests
+    opt.includes = opt.includes or ['*']
+    print(opt.excludes)
+
+
+def main():
+    global opt, logger
+    opt = get_options()
+    process_opt()
 
     test_dir = make_test_dir()
 
