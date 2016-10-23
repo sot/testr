@@ -161,27 +161,31 @@ Running the tests
 The ``run_testr`` command has the following options::
 
   $ run_testr --help
-  Usage: run_testr [options]
+  usage: run_testr [-h] [--test-spec TEST_SPEC] [--packages-dir PACKAGES_DIR]
+                   [--outputs-dir OUTPUTS_DIR] [--outputs-subdir OUTPUTS_SUBDIR]
+                   [--regress-dir REGRESS_DIR] [--include INCLUDES]
+                   [--exclude EXCLUDES] [--collect-only]
+                   [--packages-repo PACKAGES_REPO] [--overwrite]
 
-  Options:
+  optional arguments:
     -h, --help            show this help message and exit
-    --packages-dir=PACKAGES_DIR
+    --test-spec TEST_SPEC
+                          Test include/exclude specification (default=None)
+    --packages-dir PACKAGES_DIR
                           Directory containing package tests
-    --outputs-dir=OUTPUTS_DIR
+    --outputs-dir OUTPUTS_DIR
                           Root directory containing all output package test runs
-    --outputs-subdir=OUTPUTS_SUBDIR
+    --outputs-subdir OUTPUTS_SUBDIR
                           Directory containing per-run output package test runs
-    --regress-dir=REGRESS_DIR
+    --regress-dir REGRESS_DIR
                           Directory containing per-run regression files
-    --include=INCLUDE     Include tests that match comma-separated list of glob
-                          pattern(s) (default='*')
-    --exclude=EXCLUDE     Exclude tests that match comma-separated list of glob
-                          pattern(s) (default=None)
+    --include INCLUDES    Include tests that match glob pattern
+    --exclude EXCLUDES    Exclude tests that match glob pattern
     --collect-only        Collect tests but do not run
-    --packages-repo=PACKAGES_REPO
+    --packages-repo PACKAGES_REPO
                           Base URL for package git repos
     --overwrite           Overwrite existing outputs directory instead of
-                          deleting (default=False)
+                          deleting
 
 For the example directory structure, doing ``run_testr`` (with no custom options) would
 run the tests, reporting test status for each test and then finish with a summary of test
@@ -277,6 +281,42 @@ tests.  See the `post_regress.py`_ example for more discussion on that.
 
 One option from here is to copy the regress outputs into a git-versioned repo
 in a new branch and then use GitHub to do comparisons.
+
+Test specification files
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+One might like to maintain a set of unit and regression tests in a single
+testing repository but to run somewhat different combinations of those tests in
+different circumstances.  For instance one testing environment might not have
+the necessary resources to run all tests.  The tests themselves might manage
+this (i.e. pytest "skip") but it may be simpler and more explicit to
+manage these lists of tests directly.
+
+The ``--test-spec`` command line option provides a way to do this.  If you provide
+an option like ``--test-spec=HEAD`` then the following happens:
+
+- A file in the current directory named ``test_spec_HEAD`` is opened and read:
+
+  - It must contain a list of include / exclude specifications like those for
+    the ``-include`` and ``-exclude`` options.
+  - The exclude specifications are preceded by a minus sign (``-``).
+  - Blank lines or those starting with ``#`` are ignored.
+
+- The test specification file include and exclude files are appended to any
+  provided on the command line.
+
+- The regression outputs are put into a sub-directory ``HEAD`` within the
+  ``regress`` directory.
+
+Example test specification file::
+
+  # Includes
+  acisfp_check
+  dpa_check
+
+  # Excludes
+  -*_long*
+
 
 File recipes
 ^^^^^^^^^^^^
