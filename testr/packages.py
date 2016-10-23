@@ -351,7 +351,6 @@ def process_opt():
     # If opt.includes is not expicitly initialized after processing test_spec (which is
     # optional) then use ['*'] to include all tests
     opt.includes = opt.includes or ['*']
-    print(opt.excludes)
 
 
 def main():
