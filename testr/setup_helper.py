@@ -1,3 +1,4 @@
+# Licensed under a 3-clause BSD style license - see LICENSE.rst
 """
 Define a test runner command class suitable for use in ``setup.py`` so
 that ``python setup.py test`` runs tests via pytest.
