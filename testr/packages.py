@@ -130,7 +130,7 @@ def collect_tests():
                 status = 'not run' if include_test_file(package, test_file) else '----'
 
                 if test_file.endswith('.py'):
-                    interpreter = 'python'
+                    interpreter = 'python -Walways'
                 elif test_file.endswith('.sh'):
                     interpreter = 'bash'
                 else:
