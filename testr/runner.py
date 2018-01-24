@@ -1,10 +1,10 @@
+
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 """
 Provide a test() function that can be called from package __init__.
 """
 
 import os
-import re
 
 
 class TestError(Exception):
@@ -83,6 +83,7 @@ def test(*args, **kwargs):
 
     raise_exception = kwargs.pop('raise_exception', False)
     package_from_dir = kwargs.pop('package_from_dir', False)
+    get_version = kwargs.pop('get_version', False)
 
     if kwargs.pop('verbose', False) and '-v' not in args:
         args = args + ('-v',)
@@ -107,8 +108,12 @@ def test(*args, **kwargs):
         # In this case the module that called this function is the package __init__.py.
         # We get the module directly without doing another import.
         calling_frame = calling_frame_record[0]
+        calling_frame_filename = calling_frame_record[1]
         calling_func_name = calling_frame_record[3]
         calling_func_module = calling_frame.f_globals[calling_func_name].__module__
+        if get_version:
+            return get_full_version(calling_frame.f_globals,
+                                    calling_frame_filename)
 
     pkg_names = calling_func_module.split('.')
     pkg_paths = [os.path.dirname(calling_func_file)] + ['..'] * len(pkg_names)
@@ -121,3 +126,31 @@ def test(*args, **kwargs):
         raise TestError('got {} failure(s)'.format(n_fail))
 
     return n_fail
+
+
+def get_full_version(calling_frame_globals, calling_frame_filename):
+    """
+    Return a full version which includes git info if the module was imported
+    from the git repo source directory.
+    """
+    release_version = calling_frame_globals.get('__version__', 'unknown')
+
+    try:
+        from subprocess import Popen, PIPE
+        filedir = os.path.dirname(os.path.abspath(calling_frame_filename))
+
+        p = Popen(['git', 'rev-list', 'HEAD'],
+                  cwd=filedir,
+                  stdout=PIPE, stderr=PIPE, stdin=PIPE)
+        stdout, stderr = p.communicate()
+        stdout = stdout.decode('ascii')
+
+        if p.returncode == 0:
+            revs = stdout.split('\n')
+            out = release_version + '-r{}-{}'.format(len(revs), revs[0][:7])
+        else:
+            out = release_version
+    except Exception:
+        out = release_version
+
+    return out
