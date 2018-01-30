@@ -315,7 +315,7 @@ def check_files(filename, checks, allows=None, out_dir=None):
         for check in checks:
             for index, line in enumerate(lines):
                 if re.search(check, line, re.IGNORECASE):
-                    if not any(re.search(allow, line) for allow in allows):
+                    if not any(re.search(allow, line, re.IGNORECASE) for allow in allows):
                         matches.append('{!r} matched at {}:{} :: {}'
                                        .format(check, filename, index, line.strip()))
 
