@@ -338,7 +338,7 @@ def process_opt():
         # and reads additional test file include/excludes.
         opt.regress_dir = os.path.join(opt.regress_dir, opt.test_spec)
 
-        with open('test_spec_{}'.format(opt.test_spec), 'r') as fh:
+        with open('{}'.format(opt.test_spec), 'r') as fh:
             specs = (line.strip() for line in fh)
             specs = [spec for spec in specs if spec and not spec.startswith('#')]
 
