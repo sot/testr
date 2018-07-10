@@ -161,7 +161,7 @@ Running the tests
 The ``run_testr`` command has the following options::
 
   $ run_testr --help
-  usage: run_testr [-h] [--test-spec TEST_SPEC] [--packages-dir PACKAGES_DIR]
+  usage: run_testr [-h] [--test-spec TEST_SPEC_FILE] [--packages-dir PACKAGES_DIR]
                    [--outputs-dir OUTPUTS_DIR] [--outputs-subdir OUTPUTS_SUBDIR]
                    [--regress-dir REGRESS_DIR] [--include INCLUDES]
                    [--exclude EXCLUDES] [--collect-only]
@@ -169,8 +169,8 @@ The ``run_testr`` command has the following options::
 
   optional arguments:
     -h, --help            show this help message and exit
-    --test-spec TEST_SPEC
-                          Test include/exclude specification (default=None)
+    --test-spec TEST_SPEC_FILE
+                          Test include/exclude specification file(default=None)
     --packages-dir PACKAGES_DIR
                           Directory containing package tests
     --outputs-dir OUTPUTS_DIR
@@ -295,7 +295,7 @@ manage these lists of tests directly.
 The ``--test-spec`` command line option provides a way to do this.  If you provide
 an option like ``--test-spec=HEAD`` then the following happens:
 
-- A file in the current directory named ``test_spec_HEAD`` is opened and read:
+- A file in the current directory named ``HEAD`` is opened and read:
 
   - It must contain a list of include / exclude specifications like those for
     the ``-include`` and ``-exclude`` options.
