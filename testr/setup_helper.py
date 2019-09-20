@@ -27,5 +27,6 @@ class PyTest(TestCommand):
         errno = pytest.main(self.args)
         sys.exit(errno)
 
+
 # setup() cmdclass keyword for testing with py.test
 cmdclass = {'test': PyTest}

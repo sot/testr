@@ -12,7 +12,7 @@ class TestError(Exception):
 
 
 def testr(*args, **kwargs):
-    """
+    r"""
     Run py.test unit tests for the calling package.  This just calls the ``test()``
     function but includes defaults that are more appropriate for integrated package
     testing using run_testr.
@@ -37,7 +37,7 @@ def testr(*args, **kwargs):
 
 
 def test(*args, **kwargs):
-    """
+    r"""
     Run py.test unit tests for the calling package with specified
     ``args`` and ``kwargs``.
 
