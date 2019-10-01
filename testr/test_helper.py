@@ -3,11 +3,12 @@
 Provide helper functions that are useful for unit testing.
 """
 
+import sys
 import os
 from pathlib import Path
 import socket
 
-__all__ = ['has_sybase', 'on_head_network']
+__all__ = ['has_sybase', 'on_head_network', 'is_32_bit']
 
 
 def has_sybase():
@@ -48,3 +49,7 @@ def on_head_network():
                ips[1] == '142' and
                ips[2] in ('52', '184'))  # 60 Garden, CDP respectively
     return out
+
+
+def is_32_bit():
+    return sys.maxsize <= 2 ** 32
