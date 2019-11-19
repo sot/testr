@@ -6,7 +6,8 @@ testing of a set of packages within a production runtime environment.  The
 primary component of ``testr`` is lightweight testing script and file structure
 definition that simple but can support complex testing as needed.  The secondary
 component is a couple of helper functions that make it easier to define and run
-Python package unit tests.
+Python package unit tests.  This includes a ``test_helper`` module with some
+helper functions.
 
 .. toctree::
    :maxdepth: 2
@@ -506,4 +507,10 @@ testr.setup_helper
 ^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: testr.setup_helper
+   :members:
+
+testr.test_helper
+^^^^^^^^^^^^^^^^^
+
+.. automodule:: testr.test_helper
    :members:
