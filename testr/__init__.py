@@ -3,6 +3,8 @@
 Testing framework for Ska runtime environment.
 """
 
-__version__ = '4.3'
+import ska_helpers
+
+__version__ = ska_helpers.get_version(__package__)
 
 from .runner import test, testr  # noqa
