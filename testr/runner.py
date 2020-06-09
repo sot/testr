@@ -106,6 +106,10 @@ def test(*args, **kwargs):
 
     args = args + PYTEST_IGNORE_WARNINGS
 
+    if 'TESTR_OUT_DIR' in os.environ and 'TESTR_FILE' in os.environ:
+        report_file = os.path.join(os.environ['TESTR_OUT_DIR'], f"{os.environ['TESTR_FILE']}.xml")
+        args += (f'--junit-xml={report_file}',)
+
     stack_level = kwargs.pop('stack_level', 1)
     calling_frame_record = inspect.stack()[stack_level]  # Only works for stack-based Python
     calling_func_file = calling_frame_record[1]
