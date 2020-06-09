@@ -118,6 +118,11 @@ def collect_tests():
     for package in packages:
         tests[package] = []
 
+        try:
+            import ska_helpers
+            version = ska_helpers.get_version(package)
+        except:
+            version = 'unknown'
         in_dir = os.path.join(opt.packages_dir, package)
         out_dir = os.path.abspath(os.path.join(opt.outputs_dir, opt.outputs_subdir, package))
         regress_dir = os.path.abspath(os.path.join(opt.regress_dir, opt.outputs_subdir, package))
@@ -142,7 +147,8 @@ def collect_tests():
                         'out_dir': out_dir,
                         'regress_dir': regress_dir,
                         'packages_repo': opt.packages_repo,
-                        'package': package}
+                        'package': package,
+                        'package_version': version}
 
                 tests[package].append(test)
 
