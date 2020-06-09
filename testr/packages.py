@@ -218,6 +218,8 @@ def get_results_table(tests):
     for package in sorted(tests):
         for test in tests[package]:
             results.append((package, test['file'], test['status']))
+    if len(results) == 0:
+        return
     out = Table(rows=results, names=('Package', 'Script', 'Status'))
     return out
 
@@ -378,4 +380,5 @@ def main():
             run_tests(package, tests[package])  # updates tests[package] in place
 
     results = get_results_table(tests)
-    box_output(results.pformat(max_lines=-1, max_width=-1))
+    if results:
+        box_output(results.pformat(max_lines=-1, max_width=-1))
