@@ -32,20 +32,27 @@ def get_options():
     parser.add_argument("--test-spec",
                         help="Test include/exclude specification (default=None)",
                         )
+    parser.add_argument("--root",
+                        default=".",
+                        help="Directory containing standard testr configuration",
+                        )
     parser.add_argument("--packages-dir",
                         default="packages",
-                        help="Directory containing package tests",
+                        help="Directory containing package tests. Absolute, or relative to --root",
                         )
     parser.add_argument("--outputs-dir",
                         default="outputs",
-                        help="Root directory containing all output package test runs",
+                        help="Root directory containing all output package test runs."
+                             " Absolute, or relative to CWD",
                         )
     parser.add_argument("--outputs-subdir",
-                        help="Directory containing per-run output package test runs",
+                        help="Directory containing per-run output package test runs."
+                             " Relative to --outputs-dir",
                         )
     parser.add_argument("--regress-dir",
                         default="regress",
-                        help="Directory containing per-run regression files",
+                        help="Directory containing per-run regression files."
+                             " Relative to CWD",
                         )
     parser.add_argument('--include',
                         action='append',
@@ -73,7 +80,11 @@ def get_options():
                         )
     parser.set_defaults()
 
-    return parser.parse_args()
+    opt = parser.parse_args()
+    if not os.path.isabs(opt.packages_dir):
+        opt.packages_dir = os.path.join(opt.root, opt.packages_dir)
+
+    return opt
 
 
 class Tee(object):
@@ -483,7 +494,7 @@ def process_opt():
     """
     # Set up directories
     if opt.outputs_subdir is None:
-        ska_version = bash('./get_version_id')[0]
+        ska_version = bash(os.path.join(opt.root, 'get_version_id'))[0]
         opt.outputs_subdir = ska_version
 
     if opt.test_spec:
