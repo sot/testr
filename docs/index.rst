@@ -435,6 +435,102 @@ package.  This one is slightly different because it generates new database
 values and then immediately compares with the current production database.
 
 
+Summary Logs
+^^^^^^^^^^^^
+
+Testr produces a summary log which includes all tests run. It parses the logs produced by pytest, and tests are grouped
+in suites following the test hierarchy. Tests that do not use pytest are grouped in a test suite at the top level.
+The log is written in JSON format and looks something like the following:
+
+.. code-block:: JSON
+
+    {
+      "test_suite": {
+        "name": "Quaternion-tests",
+        "package": "Quaternion",
+        "test_cases": [
+          {
+            "name": "post_check_logs.py",
+            "file": "Quaternion/post_check_logs.py",
+            "timestamp": "2020:06:16T09:43:13",
+            "log": "Quaternion/post_check_logs.py.log",
+            "status": "fail",
+            "failure": {
+              "message": "post_check_logs.py failed",
+              "output": null
+            }
+          }
+        ],
+        "timestamp": "2020:06:16T09:43:13",
+        "properties": {
+          "system": "Darwin",
+          "architecture": "64bit",
+          "hostname": "saos-MacBook-Pro.local",
+          "platform": "Darwin-19.5.0",
+          "package": "Quaternion",
+          "package_version": "3.5.2.dev9+g7ee8b10.d20200616",
+          "t_start": "2020:06:16T09:43:13",
+          "t_stop": "2020:06:16T09:43:14",
+          "regress_dir": null,
+          "out_dir": "Quaternion"
+        }
+      },
+      "test_suites": [
+        {
+          "test_cases": [
+            {
+              "name": "test_shape",
+              "classname": "Quaternion.tests.test_all",
+              "file": "Quaternion/tests/test_all.py",
+              "line": "43",
+              "status": "pass"
+            },
+            {
+              "name": "test_init_exceptions",
+              "classname": "Quaternion.tests.test_all",
+              "file": "Quaternion/tests/test_all.py",
+              "line": "50",
+              "failure": {
+                "message": "Exception: Unexpected exception here",
+                "output": "def test_init_exceptions():\n>       raise Exception('Unexpected exception here')\nE       Exception: Unexpected exception here\n\nQuaternion/tests/test_all.py:52: Exception"
+              },
+              "status": "fail"
+            },
+            {
+              "name": "test_from_q",
+              "classname": "Quaternion.tests.test_all",
+              "file": "Quaternion/tests/test_all.py",
+              "line": "83",
+              "skipped": {
+                "message": "no way of currently testing this",
+                "output": "Quaternion/tests/test_all.py:83: <py._xmlgen.raw object at 0x7f9ca044fb38>"
+              },
+              "status": "skipped"
+            }
+          ],
+          "name": "Quaternion-pytest",
+          "properties": {
+            "system": "Darwin",
+            "architecture": "64bit",
+            "hostname": "saos-MacBook-Pro.local",
+            "platform": "Darwin-19.5.0",
+            "package": "Quaternion",
+            "package_version": "3.5.2.dev9+g7ee8b10.d20200616",
+            "t_start": "2020:06:16T09:43:11",
+            "t_stop": "2020:06:16T09:43:13",
+            "regress_dir": null,
+            "out_dir": "Quaternion"
+          },
+          "log": "Quaternion/test_unit.py.log",
+          "hostname": "saos-MacBook-Pro.local",
+          "timestamp": "2020:06:16T09:43:11",
+          "package": "Quaternion",
+          "file": "Quaternion/test_unit.py"
+        }
+      ]
+    }
+
+
 Python testing helpers
 -----------------------
 
