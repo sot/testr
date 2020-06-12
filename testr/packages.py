@@ -14,7 +14,9 @@ from pyyaks.logger import get_logger
 from astropy.table import Table
 from xml.dom import minidom
 import collections
-import junit_xml
+import json
+import datetime
+import platform
 
 opt = None
 logger = None
@@ -214,7 +216,7 @@ def run_tests(package, tests):
                 cmd = './' + test['file']
             else:
                 cmd = interpreter + ' ' + test['file']
-
+            test['t_start'] = datetime.datetime.now().strftime('%Y:%m:%dT%H:%M:%S')
             try:
                 bash(cmd, logfile=logfile, env=env)
             except ShellError:
@@ -222,6 +224,7 @@ def run_tests(package, tests):
                 test['status'] = 'FAIL'
             else:
                 test['status'] = 'pass'
+            test['t_stop'] = datetime.datetime.now().strftime('%Y:%m:%dT%H:%M:%S')
 
     box_output(['{} Test Summary'.format(package)] +
                ['{:20s} {}'.format(test['file'], test['status']) for test in tests])
@@ -237,7 +240,8 @@ def get_results_table(tests):
     out = Table(rows=results, names=('Package', 'Script', 'Status'))
     return out
 
-def _process_xml_testsuite(node):
+
+def _parse_xml_testsuite(node):
     attributes = collections.defaultdict(lambda : None)
     attributes.update({k: node.getAttribute(k) for k in node.attributes.keys()})
 
@@ -248,24 +252,26 @@ def _process_xml_testsuite(node):
                           if t.nodeType in [node.TEXT_NODE, node.CDATA_SECTION_NODE]]
             attributes[k] = ''.join(text_nodes)
 
-    test_suite = junit_xml.TestSuite(
-        name = attributes['name'],
-        hostname = attributes['hostname'],
-        id = attributes['id'],
-        package = attributes['package'],
-        timestamp = attributes['timestamp'],
+    test_suite = dict(
+        test_cases=[],
+        name=attributes['name'],
+        hostname=attributes['hostname'],
+        id=attributes['id'],
+        package=attributes['package'],
+        timestamp=attributes['timestamp'],
         stdout=attributes['system-out'],
         stderr=attributes['system-err'],
         #properties =
         file=attributes['file'],
-        log = None,
-        url = None,
+        log=None,
+        url=None,
     )
+    test_suite = {k: v for k, v in test_suite.items() if v is not None}
     for child in node.getElementsByTagName('testcase'):
-        test_suite.test_cases.append(_process_xml_testcase(child))
+        test_suite['test_cases'].append(_parse_xml_testcase(child))
     return test_suite
 
-def _process_xml_testcase(node):
+def _parse_xml_testcase(node):
     attributes = collections.defaultdict(lambda : None)
     attributes.update({k:node.getAttribute(k) for k in node.attributes.keys()})
 
@@ -276,7 +282,7 @@ def _process_xml_testcase(node):
                           if t.nodeType in [node.TEXT_NODE, node.CDATA_SECTION_NODE]]
             attributes[k] = ''.join(text_nodes)
 
-    test_case = junit_xml.TestCase(
+    test_case = dict(
         name=attributes['name'],
         classname=attributes['classname'],
         elapsed_sec=attributes['elapsed_sec'],
@@ -288,96 +294,149 @@ def _process_xml_testcase(node):
         log=None,
         url=None,
     )
+    test_case = {k: v for k, v in test_case.items() if v is not None}
 
     def node_text(n):
         content = [t.wholeText for t in n.childNodes
                    if t.nodeType in [node.TEXT_NODE, node.CDATA_SECTION_NODE]]
         return ''.join(content)
 
-    if node.getElementsByTagName('failure'):
-        err = node.getElementsByTagName('failure')[0]
-        test_case.add_failure_info(
-            message=err.getAttribute('message') if err.hasAttribute('message') else None,
-            output=node_text(err),
-            failure_type=err.getAttribute('error_type') if err.hasAttribute('error_type') else None
-        )
-    if node.getElementsByTagName('error'):
-        err = node.getElementsByTagName('error')[0]
-        test_case.add_failure_info(
-            message=err.getAttribute('message') if err.hasAttribute('message') else None,
-            output=node_text(err),
-            failure_type=err.getAttribute('error_type') if err.hasAttribute('error_type') else None
-        )
-    if node.getElementsByTagName('skipped'):
-        err = node.getElementsByTagName('skipped')[0]
-        test_case.add_skipped_info(
-            message=err.getAttribute('message') if err.hasAttribute('message') else None,
-            output=node_text(err),
-        )
+    test_status = {'failure': 'fail', 'error': 'error', 'skipped': 'skipped'}
+    for k in ['failure', 'error', 'skipped']:
+        if node.getElementsByTagName(k):
+            err = node.getElementsByTagName(k)[0]
+            test_case[k] = {
+                'message': err.getAttribute('message') if err.hasAttribute('message') else None,
+                'output': node_text(err)
+            }
+    test_case['status'] = 'pass'
+    for k in ['failure', 'error', 'skipped']:
+        if k in test_case:
+            test_case['status'] = test_status[k]
+            break
+
     return test_case
 
 
-def tests_to_junit_xml(tests):
-    import datetime
-    now = datetime.datetime.now().strftime('%Y:%m:%dT%H:%M:%S')
+def _parse_xml(filename):
+    dom = minidom.parse(filename)
+    test_suites = [_parse_xml_testsuite(s) for s in
+                   dom.getElementsByTagName('testsuite')]
+    return test_suites
+
+
+def _rel_path_if_descendant(path, root):
+    """
+    Take a path and return either an absolute path or a path relative to root.
+    If the path does not exists, it returns None.
+
+    :param path:
+    :param root:
+    :return:
+    """
+    real_root = os.path.realpath(root)
+    real_path = os.path.realpath(path)
+    if real_path.startswith(real_root + os.path.sep) or real_path == real_root:
+        p = os.path.relpath(real_path, real_root)
+    else:
+        p = path
+    # The following line exploits a feature of os.path.join: If a component is an absolute path, all
+    # previous components are thrown away and joining continues from the absolute path component.
+    # In other words: if p is absolute, real_root is ignored.
+    if os.path.exists(os.path.join(real_root, p)):
+        return p
+
+
+def write_log(tests, include_stdout=False):
     all_test_suites = []
+    top_testsuite = None
+    outputs_subdir = os.path.join(opt.outputs_dir, opt.outputs_subdir)
+
+    uname = platform.uname()
+    architecture, _ = platform.architecture()
+    sys_info = {
+        'system': uname.system,
+        'architecture': architecture,
+        'hostname': uname.node,
+        'platform': platform.platform(True, True)
+    }
 
     for package in sorted(tests):
-        pkg_test_suites = []
-        orphan_tests = []
         for test in tests[package]:
+            test_props = {k: test[k] for k in ['package', 'package_version', 't_start', 't_stop']}
+            for k in ['regress_dir', 'out_dir']:
+                test_props[k] = _rel_path_if_descendant(test[k], outputs_subdir)
+
             stdout = None
-            log_file = os.path.join(test['out_dir'], f"{test['file']}.log")
-            if os.path.exists(log_file):
+            test_file = _rel_path_if_descendant(os.path.join(test['out_dir'], test['file']),
+                                               outputs_subdir)
+            log_file = _rel_path_if_descendant(os.path.join(test['out_dir'], f"{test['file']}.log"),
+                                               outputs_subdir)
+            if include_stdout and log_file:
                 with open(log_file) as f:
                     stdout = f.read()
 
-            xml_file = os.path.join(test['out_dir'], f'{test["file"]}.xml')
-            if os.path.exists(xml_file):
-                dom = minidom.parse(xml_file)
-                test_suites = [_process_xml_testsuite(s) for s in
-                               dom.getElementsByTagName('testsuite')]
+            xml_file = _rel_path_if_descendant(os.path.join(test['out_dir'], f'{test["file"]}.xml'),
+                                               outputs_subdir)
+            if xml_file and os.path.exists(os.path.join(outputs_subdir, xml_file)):
+                properties = sys_info.copy()
+                properties.update(test_props)
+                test_suites = _parse_xml(os.path.join(outputs_subdir, xml_file))
                 for ts in test_suites:
-                    ts.name = f"{package}-{ts.name}"
-                    ts.properties = test
-                if len(test_suites) == 1:
-                    test_suites[0].stdout = stdout
+                    ts['properties'] = properties
+                    ts.update({
+                        'name': f"{package}-{ts['name']}",
+                        'log': log_file,
+                        'hostname': properties['hostname'],
+                        'timestamp': properties['t_start'],
+                        'package': properties['package'],
+                        'file': test_file,
+                    })
+                if stdout:
+                    # If len(test_suites) > 1, stdout is in the first suite
+                    test_suites[0]['stdout'] = stdout
                 all_test_suites += test_suites
-                pkg_test_suites += test_suites
             else:
-                test_case = junit_xml.TestCase(
+                if top_testsuite is None:
+                    properties = sys_info.copy()
+                    properties.update(test_props)
+                    top_testsuite = dict(
+                        name=f"{package}-tests",
+                        package=package,
+                        test_cases=[],
+                        timestamp=test['t_start'],
+                        properties=properties
+                    )
+                test_status = {'pass': 'pass', 'fail': 'fail', '----': 'skipped'}
+                test_case = dict(
                     name=test['file'],
-                    file=test['file'],
-                    timestamp=now,
-                    stdout=stdout,
-                    # stderr=None,
-                    # log=None,
-                    # url=None,
+                    file=test_file,
+                    timestamp=test['t_start'],
+                    log=log_file,
+                    status=test_status[test['status'].lower()]
                 )
+                if stdout:
+                    test_case['stdout'] = stdout
                 if test['status'].lower() == 'fail':
-                    test_case.add_failure_info(message=f'{test["file"]} failed')
+                    test_case['failure'] = {
+                        'message': f'{test["file"]} failed',
+                        'output': None
+                    }
                 elif test['status'].lower() == '----':
-                    test_case.add_skipped_info()
-                orphan_tests.append(test_case)
-        if orphan_tests:
-            test_suite = junit_xml.TestSuite(
-                name=f"{package}-tests",
-                package=package,
-                test_cases=orphan_tests,
-                timestamp=now,
-                properties=test,
-                # log=None,
-                # url=None,
-            )
-            all_test_suites.append(test_suite)
-            pkg_test_suites.append(test_suite)
+                    test_case['skipped'] = {
+                        'message': f'{test["file"]} skipped',
+                        'output': None
+                    }
+                top_testsuite['test_cases'].append(test_case)
 
-        outfile = os.path.join(opt.outputs_dir, opt.outputs_subdir, package, f'all_tests.xml')
-        with open(outfile, 'w') as f:
-            junit_xml.TestSuite.to_file(f, pkg_test_suites, prettyprint=True)
-    outfile = os.path.join(opt.outputs_dir, opt.outputs_subdir, f'all_tests.xml')
+    test_suites = {}
+    if top_testsuite:
+        test_suites['test_suite'] = top_testsuite
+    if all_test_suites:
+        test_suites['test_suites'] = all_test_suites
+    outfile = os.path.join(outputs_subdir, f'all_tests.json')
     with open(outfile, 'w') as f:
-        junit_xml.TestSuite.to_file(f, all_test_suites, prettyprint=True)
+        json.dump(test_suites, f, indent=2)
 
 
 def make_test_dir():
@@ -539,4 +598,4 @@ def main():
     if results:
         box_output(results.pformat(max_lines=-1, max_width=-1))
 
-    tests_to_junit_xml(tests)
+    write_log(tests)
