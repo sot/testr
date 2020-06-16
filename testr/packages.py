@@ -83,6 +83,7 @@ def get_options():
     parser.set_defaults()
 
     opt = parser.parse_args()
+    opt.root = os.path.abspath(opt.root)
     if not os.path.isabs(opt.packages_dir):
         opt.packages_dir = os.path.join(opt.root, opt.packages_dir)
 
@@ -561,6 +562,11 @@ def process_opt():
         opt.outputs_subdir = ska_version
 
     if opt.test_spec:
+        if not os.path.exists(opt.test_spec):
+            if os.path.exists(os.path.join(opt.root, opt.test_spec)):
+                opt.test_spec = os.path.join(opt.root, opt.test_spec)
+            else:
+                get_logger().error(f'test_spec file {opt.test_spec} does not exist')
         # This puts regression outputs into a separate sub-directory
         # and reads additional test file include/excludes.
         opt.regress_dir = os.path.join(opt.regress_dir, opt.test_spec)
