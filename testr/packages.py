@@ -359,7 +359,8 @@ def write_log(tests, include_stdout=False):
 
     for package in sorted(tests):
         for test in tests[package]:
-            test_props = {k: test[k] for k in ['package', 'package_version', 't_start', 't_stop']}
+            test_props = {k: (test[k] if k in test else None)
+                          for k in ['package', 'package_version', 't_start', 't_stop']}
             for k in ['regress_dir', 'out_dir']:
                 test_props[k] = _rel_path_if_descendant(test[k], outputs_subdir)
 
@@ -400,14 +401,14 @@ def write_log(tests, include_stdout=False):
                         name=f"{package}-tests",
                         package=package,
                         test_cases=[],
-                        timestamp=test['t_start'],
+                        timestamp=test_props['t_start'],
                         properties=properties
                     )
                 test_status = {'pass': 'pass', 'fail': 'fail', '----': 'skipped'}
                 test_case = dict(
                     name=test['file'],
                     file=test_file,
-                    timestamp=test['t_start'],
+                    timestamp=test_props['t_start'],
                     log=log_file,
                     status=test_status[test['status'].lower()]
                 )
