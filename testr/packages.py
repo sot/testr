@@ -82,16 +82,7 @@ def get_options():
                         )
     parser.set_defaults()
 
-    opt = parser.parse_args()
-    opt.root = os.path.abspath(opt.root)
-    if not os.path.isabs(opt.packages_dir):
-        opt.packages_dir = os.path.join(opt.root, opt.packages_dir)
-
-    if opt.outputs_subdir and os.path.isabs(opt.outputs_subdir):
-        get_logger().error('outputs-subdir must be a relative path')
-        parser.exit(1)
-
-    return opt
+    return parser.parse_args()
 
 
 class Tee(object):
@@ -557,6 +548,14 @@ def process_opt():
     convenience.
     """
     # Set up directories
+    opt.root = os.path.abspath(opt.root)
+    if not os.path.isabs(opt.packages_dir):
+        opt.packages_dir = os.path.join(opt.root, opt.packages_dir)
+
+    if opt.outputs_subdir and os.path.isabs(opt.outputs_subdir):
+        get_logger().error('outputs-subdir must be a relative path')
+        sys.exit(1)
+
     if opt.outputs_subdir is None:
         ska_version = bash(os.path.join(opt.root, 'get_version_id'))[0]
         opt.outputs_subdir = ska_version
@@ -567,6 +566,7 @@ def process_opt():
                 opt.test_spec = os.path.join(opt.root, opt.test_spec)
             else:
                 get_logger().error(f'test_spec file {opt.test_spec} does not exist')
+                sys.exit(1)
         # This puts regression outputs into a separate sub-directory
         # and reads additional test file include/excludes.
         opt.regress_dir = os.path.join(opt.regress_dir, opt.test_spec)
