@@ -162,24 +162,29 @@ Running the tests
 The ``run_testr`` command has the following options::
 
   $ run_testr --help
-  usage: run_testr [-h] [--test-spec TEST_SPEC_FILE] [--packages-dir PACKAGES_DIR]
-                   [--outputs-dir OUTPUTS_DIR] [--outputs-subdir OUTPUTS_SUBDIR]
-                   [--regress-dir REGRESS_DIR] [--include INCLUDES]
-                   [--exclude EXCLUDES] [--collect-only]
+  usage: run_testr [-h] [--test-spec TEST_SPEC] [--root ROOT]
+                   [--packages-dir PACKAGES_DIR] [--outputs-dir OUTPUTS_DIR]
+                   [--outputs-subdir OUTPUTS_SUBDIR] [--regress-dir REGRESS_DIR]
+                   [--include INCLUDES] [--exclude EXCLUDES] [--collect-only]
                    [--packages-repo PACKAGES_REPO] [--overwrite]
 
   optional arguments:
     -h, --help            show this help message and exit
-    --test-spec TEST_SPEC_FILE
-                          Test include/exclude specification file(default=None)
+    --test-spec TEST_SPEC
+                          Test include/exclude specification (default=None)
+    --root ROOT           Directory containing standard testr configuration
     --packages-dir PACKAGES_DIR
-                          Directory containing package tests
+                          Directory containing package tests. Absolute, or
+                          relative to --root
     --outputs-dir OUTPUTS_DIR
-                          Root directory containing all output package test runs
+                          Root directory containing all output package test
+                          runs. Absolute, or relative to CWD
     --outputs-subdir OUTPUTS_SUBDIR
-                          Directory containing per-run output package test runs
+                          Directory containing per-run output package test runs.
+                          Relative to --outputs-dir
     --regress-dir REGRESS_DIR
-                          Directory containing per-run regression files
+                          Directory containing per-run regression files.
+                          Relative to CWD
     --include INCLUDES    Include tests that match glob pattern
     --exclude EXCLUDES    Exclude tests that match glob pattern
     --collect-only        Collect tests but do not run
@@ -187,6 +192,12 @@ The ``run_testr`` command has the following options::
                           Base URL for package git repos
     --overwrite           Overwrite existing outputs directory instead of
                           deleting
+  usage: run_testr [-h] [--test-spec TEST_SPEC_FILE] [--packages-dir PACKAGES_DIR]
+                   [--outputs-dir OUTPUTS_DIR] [--outputs-subdir OUTPUTS_SUBDIR]
+                   [--regress-dir REGRESS_DIR] [--include INCLUDES]
+                   [--exclude EXCLUDES] [--collect-only]
+                   [--packages-repo PACKAGES_REPO] [--overwrite]
+
 
 For the example directory structure, doing ``run_testr`` (with no custom options) would
 run the tests, reporting test status for each test and then finish with a summary of test
