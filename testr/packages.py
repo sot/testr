@@ -86,6 +86,10 @@ def get_options():
     if not os.path.isabs(opt.packages_dir):
         opt.packages_dir = os.path.join(opt.root, opt.packages_dir)
 
+    if os.path.isabs(opt.outputs_subdir):
+        get_logger().error('outputs-subdir must be a relative path')
+        parser.exit(1)
+
     return opt
 
 
