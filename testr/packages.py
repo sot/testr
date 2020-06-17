@@ -345,7 +345,6 @@ def _rel_path_if_descendant(path, root):
 
 def write_log(tests, include_stdout=False):
     all_test_suites = []
-    top_testsuite = None
     outputs_subdir = os.path.join(opt.outputs_dir, opt.outputs_subdir)
 
     uname = platform.uname()
@@ -358,6 +357,8 @@ def write_log(tests, include_stdout=False):
     }
 
     for package in sorted(tests):
+        top_testsuite = None
+        package_test_suites = []
         for test in tests[package]:
             test_props = {k: (test[k] if k in test else None)
                           for k in ['package', 'package_version', 't_start', 't_stop']}
@@ -392,7 +393,7 @@ def write_log(tests, include_stdout=False):
                 if stdout:
                     # If len(test_suites) > 1, stdout is in the first suite
                     test_suites[0]['stdout'] = stdout
-                all_test_suites += test_suites
+                package_test_suites += test_suites
             else:
                 if top_testsuite is None:
                     properties = sys_info.copy()
@@ -426,9 +427,14 @@ def write_log(tests, include_stdout=False):
                     }
                 top_testsuite['test_cases'].append(test_case)
 
+        if len(package_test_suites) == 1:
+            package_test_suites[0]['test_cases'] += top_testsuite['test_cases']
+        else:
+            package_test_suites.append(top_testsuite)
+
+        all_test_suites += package_test_suites
+
     test_suites = {}
-    if top_testsuite:
-        test_suites['test_suite'] = top_testsuite
     if all_test_suites:
         test_suites['test_suites'] = all_test_suites
     outfile = os.path.join(outputs_subdir, f'all_tests.json')
