@@ -447,7 +447,7 @@ def make_test_dir():
 
     # Make a symlink 'last' to the most recent directory
     with Ska.File.chdir(opt.outputs_dir):
-        if os.path.exists('last'):
+        if os.path.lexists('last'):
             os.unlink('last')
         os.symlink(opt.outputs_subdir, 'last')
 
