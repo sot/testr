@@ -556,9 +556,12 @@ def process_opt():
     if opt.outputs_subdir and os.path.isabs(opt.outputs_subdir):
         get_logger().error('outputs-subdir must be a relative path')
         sys.exit(1)
-
-    if opt.outputs_subdir is None:
-        ska_version = bash(os.path.join(opt.root, 'get_version_id'))[0]
+    elif opt.outputs_subdir is None:
+        get_version_id = os.path.join(opt.root, 'get_version_id')
+        if not os.path.exists(get_version_id):
+            get_logger().error(f'No get_version_id script in root directory: {opt.root}')
+            sys.exit(1)
+        ska_version = bash(get_version_id)[0]
         opt.outputs_subdir = ska_version
 
     if opt.test_spec:
@@ -570,7 +573,7 @@ def process_opt():
                 sys.exit(1)
         # This puts regression outputs into a separate sub-directory
         # and reads additional test file include/excludes.
-        opt.regress_dir = os.path.join(opt.regress_dir, opt.test_spec)
+        opt.regress_dir = os.path.join(opt.regress_dir, os.path.basename(opt.test_spec))
 
         with open('{}'.format(opt.test_spec), 'r') as fh:
             specs = (line.strip() for line in fh)
