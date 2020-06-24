@@ -24,7 +24,13 @@ class PyTest(TestCommand):
     def run_tests(self):
         # Import here because outside the eggs aren't loaded
         import pytest
-        errno = pytest.main(self.args)
+        import shlex
+        from .runner import PYTEST_IGNORE_WARNINGS
+
+        args = list(PYTEST_IGNORE_WARNINGS)
+        if self.args:
+            args += shlex.split(self.args)
+        errno = pytest.main(args)
         sys.exit(errno)
 
 
