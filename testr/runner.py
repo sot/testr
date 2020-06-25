@@ -7,6 +7,20 @@ Provide a test() function that can be called from package __init__.
 import os
 
 
+# Pytest args for main() to ignore several warnings that show up regularly in
+# testing but can be ignored.
+PYTEST_IGNORE_WARNINGS = (
+    # See https://github.com/numpy/numpy/issues/11788 for why the numpy.ufunc
+    # warning is apparently OK.
+    '-Wignore:numpy.ufunc size changed:RuntimeWarning',
+
+    # Shows up in upstream packages including ipyparallel
+    '-Wignore:the imp module is deprecated in favour of importlib:DeprecationWarning',
+
+    # Shows up in setuptools_scm
+    '-Wignore:parse functions are required to provide a named:PendingDeprecationWarning')
+
+
 class TestError(Exception):
     pass
 
@@ -89,6 +103,8 @@ def test(*args, **kwargs):
         args = args + ('-v',)
     if kwargs.pop('show_output', False) and '-s' not in args:
         args = args + ('-s',)
+
+    args = args + PYTEST_IGNORE_WARNINGS
 
     stack_level = kwargs.pop('stack_level', 1)
     calling_frame_record = inspect.stack()[stack_level]  # Only works for stack-based Python
