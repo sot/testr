@@ -51,10 +51,15 @@ def get_options():
                         help="Directory containing per-run output package test runs."
                              " Relative to --outputs-dir",
                         )
+    parser.add_argument("--log-dir",
+                        default="logs",
+                        help="Directory containing per-run log files."
+                             " Absolute, or relative to --outputs-subdir",
+                        )
     parser.add_argument("--regress-dir",
                         default="regress",
                         help="Directory containing per-run regression files."
-                             " Relative to CWD",
+                             " Absolute, or relative to --outputs-subdir",
                         )
     parser.add_argument('--include',
                         action='append',
@@ -136,8 +141,8 @@ def collect_tests():
         except:
             version = 'unknown'
         in_dir = os.path.join(opt.packages_dir, package)
-        out_dir = os.path.abspath(os.path.join(opt.outputs_dir, opt.outputs_subdir, package))
-        regress_dir = os.path.abspath(os.path.join(opt.regress_dir, opt.outputs_subdir, package))
+        out_dir = os.path.abspath(os.path.join(opt.log_dir, package))
+        regress_dir = os.path.abspath(os.path.join(opt.regress_dir, package))
 
         with Ska.File.chdir(in_dir):
             test_files = sorted(glob('test_*')) + sorted(glob('post_*'))
@@ -181,7 +186,7 @@ def run_tests(package, tests):
         return []
 
     # Copy all files for package tests.
-    out_dir = os.path.join(opt.outputs_dir, opt.outputs_subdir, package)
+    out_dir = os.path.join(opt.log_dir, package)
     if not opt.overwrite and os.path.exists(out_dir):
         logger.info('Removing existing output dir {}'.format(out_dir))
         shutil.rmtree(out_dir)
@@ -345,7 +350,7 @@ def _rel_path_if_descendant(path, root):
 
 def write_log(tests, include_stdout=False):
     all_test_suites = []
-    outputs_subdir = os.path.join(opt.outputs_dir, opt.outputs_subdir)
+    outputs_subdir = opt.log_dir
 
     uname = platform.uname()
     architecture, _ = platform.architecture()
@@ -443,7 +448,7 @@ def write_log(tests, include_stdout=False):
 
 
 def make_test_dir():
-    test_dir = os.path.join(opt.outputs_dir, opt.outputs_subdir)
+    test_dir = opt.log_dir
     if os.path.exists(test_dir):
         print('WARNING: reusing existing output directory {}\n'.format(test_dir))
         # TODO: maybe make this a raw_input confirmation in production.  Note:
@@ -451,11 +456,12 @@ def make_test_dir():
     else:
         os.makedirs(test_dir)
 
-    # Make a symlink 'last' to the most recent directory
-    with Ska.File.chdir(opt.outputs_dir):
-        if os.path.lexists('last'):
-            os.unlink('last')
-        os.symlink(opt.outputs_subdir, 'last')
+    if opt.outputs_dir and opt.outputs_subdir:
+        # Make a symlink 'last' to the most recent directory
+        with Ska.File.chdir(opt.outputs_dir):
+            if os.path.lexists('last'):
+                os.unlink('last')
+            os.symlink(opt.outputs_subdir, 'last')
 
     return test_dir
 
@@ -556,8 +562,8 @@ def process_opt():
     """
     # Set up directories
     opt.root = os.path.abspath(opt.root)
-    if not os.path.isabs(opt.packages_dir):
-        opt.packages_dir = os.path.join(opt.root, opt.packages_dir)
+    # the following line has no effect if opt.packages_dir is an absolute path
+    opt.packages_dir = os.path.join(opt.root, opt.packages_dir)
 
     if opt.outputs_subdir and os.path.isabs(opt.outputs_subdir):
         get_logger().error('outputs-subdir must be a relative path')
@@ -569,6 +575,17 @@ def process_opt():
             sys.exit(1)
         ska_version = bash(get_version_id)[0]
         opt.outputs_subdir = ska_version
+
+    # if opt.log_dir and are absolute, then opt.outputs_dir and opt.outputs_subdir mean nothing
+    if os.path.isabs(opt.log_dir) and os.path.isabs(opt.regress_dir):
+        opt.outputs_dir = ''
+        opt.outputs_subdir = ''
+    opt.log_dir = os.path.abspath(os.path.join(opt.outputs_dir,
+                                               opt.outputs_subdir,
+                                               opt.log_dir))
+    opt.regress_dir = os.path.abspath(os.path.join(opt.outputs_dir,
+                                                   opt.outputs_subdir,
+                                                   opt.regress_dir))
 
     if opt.test_spec:
         if not os.path.exists(opt.test_spec):
