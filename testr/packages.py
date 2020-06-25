@@ -456,12 +456,11 @@ def make_test_dir():
     else:
         os.makedirs(test_dir)
 
-    if opt.outputs_dir and opt.outputs_subdir:
-        # Make a symlink 'last' to the most recent directory
-        with Ska.File.chdir(opt.outputs_dir):
-            if os.path.lexists('last'):
-                os.unlink('last')
-            os.symlink(opt.outputs_subdir, 'last')
+    # Make a symlink 'last' to the most recent directory
+    with Ska.File.chdir(os.path.dirname(opt.log_dir)):
+        if os.path.lexists('last'):
+            os.unlink('last')
+        os.symlink(os.path.basename(opt.log_dir), 'last')
 
     return test_dir
 
@@ -576,16 +575,15 @@ def process_opt():
         ska_version = bash(get_version_id)[0]
         opt.outputs_subdir = ska_version
 
-    # if opt.log_dir and are absolute, then opt.outputs_dir and opt.outputs_subdir mean nothing
+    # if opt.log_dir and are absolute, then opt.outputs_dir means nothing
     if os.path.isabs(opt.log_dir) and os.path.isabs(opt.regress_dir):
         opt.outputs_dir = ''
-        opt.outputs_subdir = ''
     opt.log_dir = os.path.abspath(os.path.join(opt.outputs_dir,
-                                               opt.outputs_subdir,
-                                               opt.log_dir))
+                                               opt.log_dir,
+                                               opt.outputs_subdir))
     opt.regress_dir = os.path.abspath(os.path.join(opt.outputs_dir,
-                                                   opt.outputs_subdir,
-                                                   opt.regress_dir))
+                                                   opt.regress_dir,
+                                                   opt.outputs_subdir))
 
     if opt.test_spec:
         if not os.path.exists(opt.test_spec):
