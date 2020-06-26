@@ -7,6 +7,7 @@ from fnmatch import fnmatch
 import sys
 import os
 import shutil
+import subprocess
 
 import Ska.File
 from Ska.Shell import bash, ShellError, Spawn
@@ -439,8 +440,28 @@ def write_log(tests, include_stdout=False):
 
         all_test_suites += package_test_suites
 
-    test_suites = {}
+    try:
+        ska_version = subprocess.check_output(['ska_version']).decode().strip()
+    except FileNotFoundError:
+        ska_version = 'None'
+    test_suites = {
+        'run_info': {
+            'date': datetime.datetime.now().strftime('%Y:%m:%dT%H:%M:%S'),
+            'argv': sys.argv,
+            'ska_version': ska_version
+        }
+    }
     if all_test_suites:
+        test_suites['run_info']['t_stop'] = min([ts['properties']['t_stop']
+                                                 for ts in all_test_suites if
+                                                 ts['properties']['t_start'] is not None])
+        test_suites['run_info']['t_start'] = min([ts['properties']['t_start']
+                                                  for ts in all_test_suites if
+                                                  ts['properties']['t_start'] is not None])
+        test_suites['run_info'].update({
+            k: sorted(set([ts['properties'][k] for ts in all_test_suites]))
+            for k in ['architecture', 'hostname', 'system', 'platform']
+        })
         test_suites['test_suites'] = all_test_suites
     outfile = os.path.join(outputs_subdir, f'all_tests.json')
     with open(outfile, 'w') as f:
