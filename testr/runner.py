@@ -115,6 +115,10 @@ def test(*args, **kwargs):
         args += (f'--junit-xml={report_file}',)
         args += ('-o', 'junit_family=xunit2')
 
+    # Disable caching of test results to prevent users trying to write into
+    # flight directory if tests fail running on installed package.
+    args = args + ('-p', 'no:cacheprovider')
+
     stack_level = kwargs.pop('stack_level', 1)
     calling_frame_record = inspect.stack()[stack_level]  # Only works for stack-based Python
     calling_func_file = calling_frame_record[1]
