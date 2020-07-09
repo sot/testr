@@ -174,9 +174,6 @@ The ``run_testr`` command has the following options::
     --test-spec TEST_SPEC
                           Test include/exclude specification (default=None)
     --root ROOT           Directory containing standard testr configuration
-    --packages-dir PACKAGES_DIR
-                          Directory containing package tests. Absolute, or
-                          relative to --root
     --outputs-dir OUTPUTS_DIR
                           Root directory containing all output package test
                           runs. Absolute, or relative to CWD

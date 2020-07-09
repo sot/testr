@@ -568,9 +568,7 @@ def process_opt():
     """
     # Set up directories
     opt.root = os.path.abspath(opt.root)
-    # the following line has no effect if opt.packages_dir is an absolute path
-    opt.packages_dir = os.path.join(opt.root, opt.packages_dir)
-
+    opt.packages_dir = os.path.join(opt.root, 'packages')
     get_version_id = os.path.join(opt.root, 'get_version_id')
     if not os.path.exists(get_version_id):
         get_logger().error(f'No get_version_id script in root directory: {opt.root}')
@@ -605,7 +603,7 @@ def process_opt():
                 else:
                     opt.includes.append(spec)
 
-    # If opt.includes is not expicitly initialized after processing test_spec (which is
+    # If opt.includes is not explicitly initialized after processing test_spec (which is
     # optional) then use ['*'] to include all tests
     opt.includes = opt.includes or ['*']
 
