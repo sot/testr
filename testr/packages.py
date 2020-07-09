@@ -577,9 +577,6 @@ def process_opt():
         sys.exit(1)
     outputs_subdir = bash(get_version_id)[0]
 
-    # if opt.log_dir and opt.regress_dir are absolute, then opt.outputs_dir means nothing
-    if os.path.isabs(opt.log_dir) and os.path.isabs(opt.regress_dir):
-        opt.outputs_dir = ''
     opt.log_dir = os.path.abspath(os.path.join(opt.outputs_dir,
                                                'logs',
                                                outputs_subdir))
