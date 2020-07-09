@@ -164,8 +164,9 @@ The ``run_testr`` command has the following options::
   $ run_testr --help
   usage: run_testr [-h] [--test-spec TEST_SPEC] [--root ROOT]
                    [--packages-dir PACKAGES_DIR] [--outputs-dir OUTPUTS_DIR]
-                   [--outputs-subdir OUTPUTS_SUBDIR] [--regress-dir REGRESS_DIR]
-                   [--include INCLUDES] [--exclude EXCLUDES] [--collect-only]
+                   [--outputs-subdir OUTPUTS_SUBDIR] [--log-dir LOG_DIR]
+                   [--regress-dir REGRESS_DIR] [--include INCLUDES]
+                   [--exclude EXCLUDES] [--collect-only]
                    [--packages-repo PACKAGES_REPO] [--overwrite]
 
   optional arguments:
@@ -182,9 +183,11 @@ The ``run_testr`` command has the following options::
     --outputs-subdir OUTPUTS_SUBDIR
                           Directory containing per-run output package test runs.
                           Relative to --outputs-dir
+    --log-dir LOG_DIR     Directory containing per-run log files. Absolute, or
+                          relative to --outputs-subdir
     --regress-dir REGRESS_DIR
                           Directory containing per-run regression files.
-                          Relative to CWD
+                          Absolute, or relative to --outputs-subdir
     --include INCLUDES    Include tests that match glob pattern
     --exclude EXCLUDES    Exclude tests that match glob pattern
     --collect-only        Collect tests but do not run
@@ -192,11 +195,6 @@ The ``run_testr`` command has the following options::
                           Base URL for package git repos
     --overwrite           Overwrite existing outputs directory instead of
                           deleting
-  usage: run_testr [-h] [--test-spec TEST_SPEC_FILE] [--packages-dir PACKAGES_DIR]
-                   [--outputs-dir OUTPUTS_DIR] [--outputs-subdir OUTPUTS_SUBDIR]
-                   [--regress-dir REGRESS_DIR] [--include INCLUDES]
-                   [--exclude EXCLUDES] [--collect-only]
-                   [--packages-repo PACKAGES_REPO] [--overwrite]
 
 
 For the example directory structure, doing ``run_testr`` (with no custom options) would
