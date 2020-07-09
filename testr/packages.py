@@ -596,7 +596,7 @@ def process_opt():
         ska_version = bash(get_version_id)[0]
         opt.outputs_subdir = ska_version
 
-    # if opt.log_dir and are absolute, then opt.outputs_dir means nothing
+    # if opt.log_dir and opt.regress_dir are absolute, then opt.outputs_dir means nothing
     if os.path.isabs(opt.log_dir) and os.path.isabs(opt.regress_dir):
         opt.outputs_dir = ''
     opt.log_dir = os.path.abspath(os.path.join(opt.outputs_dir,
