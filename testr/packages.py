@@ -576,7 +576,6 @@ def process_opt():
         get_logger().error(f'No get_version_id script in root directory: {opt.root}')
         sys.exit(1)
     outputs_subdir = bash(get_version_id)[0]
-
     opt.log_dir = os.path.abspath(os.path.join(opt.outputs_dir,
                                                'logs',
                                                outputs_subdir))

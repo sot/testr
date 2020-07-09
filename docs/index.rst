@@ -180,14 +180,6 @@ The ``run_testr`` command has the following options::
     --outputs-dir OUTPUTS_DIR
                           Root directory containing all output package test
                           runs. Absolute, or relative to CWD
-    --outputs-subdir OUTPUTS_SUBDIR
-                          Directory containing per-run output package test runs.
-                          Relative to --outputs-dir
-    --log-dir LOG_DIR     Directory containing per-run log files. Absolute, or
-                          relative to --outputs-subdir
-    --regress-dir REGRESS_DIR
-                          Directory containing per-run regression files.
-                          Absolute, or relative to --outputs-subdir
     --include INCLUDES    Include tests that match glob pattern
     --exclude EXCLUDES    Exclude tests that match glob pattern
     --collect-only        Collect tests but do not run
