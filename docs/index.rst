@@ -173,7 +173,7 @@ The ``run_testr`` command has the following options::
                           Test include/exclude specification (default=None)
     --root ROOT           Directory containing standard testr configuration
     --outputs-dir OUTPUTS_DIR
-                          Root directory containing all output package test
+                          Directory containing all output package test
                           runs. Absolute, or relative to CWD
     --include INCLUDES    Include tests that match glob pattern
     --exclude EXCLUDES    Exclude tests that match glob pattern
