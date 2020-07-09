@@ -220,35 +220,38 @@ the current directory or any sub-directories therein.  ::
 
   # Testing and post-process scripts and outputs
   outputs/
+    last -> 0.18-r609-0d91665
     0.18-r609-0d91665/
-      test.log              # Master log file of test processing and results
-      py_package/
-        helper_script.py
-        test_unit.py
-        test_unit.py.log    # Log file from running test_unit.py
-        test_regress.sh
-        test_regress.sh.log # Log file
-        post_regress.py
-        post_regress.py.log # Log file
-        post_check_logs.py
-        post_check_logs.py.log
-        out.dat             # Example data file from test_regress.sh
-        index.html          # Example web page from test_regress.sh
-      other_package/
-        test_regress_long.sh
-        test_regress_long.sh.log
-        post_regress_long.py
-        post_regress_long.py.log
-        big_data.dat        # More data
+      logs/
+        all_tests.json        # Master log file in JUnit's XML format
+        test.log              # Master log file of test processing and results
+        py_package/
+          helper_script.py
+          test_unit.py
+          test_unit.py.log    # Log file from running test_unit.py
+          test_regress.sh
+          test_regress.sh.log # Log file
+          post_regress.py
+          post_regress.py.log # Log file
+          post_check_logs.py
+          post_check_logs.py.log
+          out.dat             # Example data file from test_regress.sh
+          index.html          # Example web page from test_regress.sh
+        other_package/
+          test_regress_long.sh
+          test_regress_long.sh.log
+          post_regress_long.py
+          post_regress_long.py.log
+          big_data.dat        # More data
 
-  # Regression outputs, copied from outputs/ by post_regress* scripts
-  regress/
-    0.18-r609-0d91665/
-      py_package/
-        out.dat             # Example data file from test_regress.sh
-        index.html          # Example web page from test_regress.sh
-      other_package/
-        big_data.dat        # More data
+      # Regression outputs, copied from outputs/ by post_regress* scripts
+      regress/
+        0.18-r609-0d91665/
+          py_package/
+            out.dat             # Example data file from test_regress.sh
+            index.html          # Example web page from test_regress.sh
+          other_package/
+            big_data.dat        # More data
 
 Selecting tests
 ^^^^^^^^^^^^^^^
