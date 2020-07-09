@@ -163,9 +163,7 @@ The ``run_testr`` command has the following options::
 
   $ run_testr --help
   usage: run_testr [-h] [--test-spec TEST_SPEC] [--root ROOT]
-                   [--packages-dir PACKAGES_DIR] [--outputs-dir OUTPUTS_DIR]
-                   [--outputs-subdir OUTPUTS_SUBDIR] [--log-dir LOG_DIR]
-                   [--regress-dir REGRESS_DIR] [--include INCLUDES]
+                   [--outputs-dir OUTPUTS_DIR] [--include INCLUDES]
                    [--exclude EXCLUDES] [--collect-only]
                    [--packages-repo PACKAGES_REPO] [--overwrite]
 
