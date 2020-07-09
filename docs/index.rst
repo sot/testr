@@ -246,12 +246,11 @@ the current directory or any sub-directories therein.  ::
 
       # Regression outputs, copied from outputs/ by post_regress* scripts
       regress/
-        0.18-r609-0d91665/
-          py_package/
-            out.dat             # Example data file from test_regress.sh
-            index.html          # Example web page from test_regress.sh
-          other_package/
-            big_data.dat        # More data
+        py_package/
+          out.dat             # Example data file from test_regress.sh
+          index.html          # Example web page from test_regress.sh
+        other_package/
+          big_data.dat        # More data
 
 Selecting tests
 ^^^^^^^^^^^^^^^
