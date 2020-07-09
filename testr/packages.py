@@ -39,10 +39,6 @@ def get_options():
                         default=".",
                         help="Directory containing standard testr configuration",
                         )
-    parser.add_argument("--packages-dir",
-                        default="packages",
-                        help="Directory containing package tests. Absolute, or relative to --root",
-                        )
     parser.add_argument("--outputs-dir",
                         default="outputs",
                         help="Root directory containing all output package test runs."
