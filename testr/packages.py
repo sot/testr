@@ -48,20 +48,6 @@ def get_options():
                         help="Root directory containing all output package test runs."
                              " Absolute, or relative to CWD",
                         )
-    parser.add_argument("--outputs-subdir",
-                        help="Directory containing per-run output package test runs."
-                             " Relative to --outputs-dir",
-                        )
-    parser.add_argument("--log-dir",
-                        default="logs",
-                        help="Directory containing per-run log files."
-                             " Absolute, or relative to --outputs-subdir",
-                        )
-    parser.add_argument("--regress-dir",
-                        default="regress",
-                        help="Directory containing per-run regression files."
-                             " Absolute, or relative to --outputs-subdir",
-                        )
     parser.add_argument('--include',
                         action='append',
                         default=[],
@@ -585,26 +571,21 @@ def process_opt():
     # the following line has no effect if opt.packages_dir is an absolute path
     opt.packages_dir = os.path.join(opt.root, opt.packages_dir)
 
-    if opt.outputs_subdir and os.path.isabs(opt.outputs_subdir):
-        get_logger().error('outputs-subdir must be a relative path')
+    get_version_id = os.path.join(opt.root, 'get_version_id')
+    if not os.path.exists(get_version_id):
+        get_logger().error(f'No get_version_id script in root directory: {opt.root}')
         sys.exit(1)
-    elif opt.outputs_subdir is None:
-        get_version_id = os.path.join(opt.root, 'get_version_id')
-        if not os.path.exists(get_version_id):
-            get_logger().error(f'No get_version_id script in root directory: {opt.root}')
-            sys.exit(1)
-        ska_version = bash(get_version_id)[0]
-        opt.outputs_subdir = ska_version
+    outputs_subdir = bash(get_version_id)[0]
 
     # if opt.log_dir and opt.regress_dir are absolute, then opt.outputs_dir means nothing
     if os.path.isabs(opt.log_dir) and os.path.isabs(opt.regress_dir):
         opt.outputs_dir = ''
     opt.log_dir = os.path.abspath(os.path.join(opt.outputs_dir,
-                                               opt.log_dir,
-                                               opt.outputs_subdir))
+                                               'logs',
+                                               outputs_subdir))
     opt.regress_dir = os.path.abspath(os.path.join(opt.outputs_dir,
-                                                   opt.regress_dir,
-                                                   opt.outputs_subdir))
+                                                   'regress',
+                                                   outputs_subdir))
 
     if opt.test_spec:
         if not os.path.exists(opt.test_spec):
