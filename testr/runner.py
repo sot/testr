@@ -99,12 +99,21 @@ def test(*args, **kwargs):
     package_from_dir = kwargs.pop('package_from_dir', False)
     get_version = kwargs.pop('get_version', False)
 
-    if kwargs.pop('verbose', False) and '-v' not in args:
+    if 'TESTR_PYTEST_ARGS' in os.environ:
+        args = args + tuple(os.environ['TESTR_PYTEST_ARGS'].split())
+
+    arg_names = [a.split('=')[0] for a in args]
+    if kwargs.pop('verbose', False) and '-v' not in args and '-q' not in arg_names:
         args = args + ('-v',)
-    if kwargs.pop('show_output', False) and '-s' not in args:
+    if kwargs.pop('show_output', False) and '-s' not in args and '--capture' not in arg_names:
         args = args + ('-s',)
 
     args = args + PYTEST_IGNORE_WARNINGS
+
+    if 'TESTR_OUT_DIR' in os.environ and 'TESTR_FILE' in os.environ:
+        report_file = os.path.join(os.environ['TESTR_OUT_DIR'], f"{os.environ['TESTR_FILE']}.xml")
+        args += (f'--junit-xml={report_file}',)
+        args += ('-o', 'junit_family=xunit2')
 
     stack_level = kwargs.pop('stack_level', 1)
     calling_frame_record = inspect.stack()[stack_level]  # Only works for stack-based Python

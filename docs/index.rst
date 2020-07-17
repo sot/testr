@@ -162,24 +162,19 @@ Running the tests
 The ``run_testr`` command has the following options::
 
   $ run_testr --help
-  usage: run_testr [-h] [--test-spec TEST_SPEC_FILE] [--packages-dir PACKAGES_DIR]
-                   [--outputs-dir OUTPUTS_DIR] [--outputs-subdir OUTPUTS_SUBDIR]
-                   [--regress-dir REGRESS_DIR] [--include INCLUDES]
+  usage: run_testr [-h] [--test-spec TEST_SPEC] [--root ROOT]
+                   [--outputs-dir OUTPUTS_DIR] [--include INCLUDES]
                    [--exclude EXCLUDES] [--collect-only]
                    [--packages-repo PACKAGES_REPO] [--overwrite]
 
   optional arguments:
     -h, --help            show this help message and exit
-    --test-spec TEST_SPEC_FILE
-                          Test include/exclude specification file(default=None)
-    --packages-dir PACKAGES_DIR
-                          Directory containing package tests
+    --test-spec TEST_SPEC
+                          Test include/exclude specification (default=None)
+    --root ROOT           Directory containing standard testr configuration
     --outputs-dir OUTPUTS_DIR
-                          Root directory containing all output package test runs
-    --outputs-subdir OUTPUTS_SUBDIR
-                          Directory containing per-run output package test runs
-    --regress-dir REGRESS_DIR
-                          Directory containing per-run regression files
+                          Directory containing all output package test
+                          runs. Absolute, or relative to CWD
     --include INCLUDES    Include tests that match glob pattern
     --exclude EXCLUDES    Exclude tests that match glob pattern
     --collect-only        Collect tests but do not run
@@ -187,6 +182,7 @@ The ``run_testr`` command has the following options::
                           Base URL for package git repos
     --overwrite           Overwrite existing outputs directory instead of
                           deleting
+
 
 For the example directory structure, doing ``run_testr`` (with no custom options) would
 run the tests, reporting test status for each test and then finish with a summary of test
@@ -211,35 +207,37 @@ the current directory or any sub-directories therein.  ::
 
   # Testing and post-process scripts and outputs
   outputs/
+    last -> 0.18-r609-0d91665
     0.18-r609-0d91665/
-      test.log              # Master log file of test processing and results
-      py_package/
-        helper_script.py
-        test_unit.py
-        test_unit.py.log    # Log file from running test_unit.py
-        test_regress.sh
-        test_regress.sh.log # Log file
-        post_regress.py
-        post_regress.py.log # Log file
-        post_check_logs.py
-        post_check_logs.py.log
-        out.dat             # Example data file from test_regress.sh
-        index.html          # Example web page from test_regress.sh
-      other_package/
-        test_regress_long.sh
-        test_regress_long.sh.log
-        post_regress_long.py
-        post_regress_long.py.log
-        big_data.dat        # More data
+      logs/
+        all_tests.json        # Master log file in JUnit's XML format
+        test.log              # Master log file of test processing and results
+        py_package/
+          helper_script.py
+          test_unit.py
+          test_unit.py.log    # Log file from running test_unit.py
+          test_regress.sh
+          test_regress.sh.log # Log file
+          post_regress.py
+          post_regress.py.log # Log file
+          post_check_logs.py
+          post_check_logs.py.log
+          out.dat             # Example data file from test_regress.sh
+          index.html          # Example web page from test_regress.sh
+        other_package/
+          test_regress_long.sh
+          test_regress_long.sh.log
+          post_regress_long.py
+          post_regress_long.py.log
+          big_data.dat        # More data
 
-  # Regression outputs, copied from outputs/ by post_regress* scripts
-  regress/
-    0.18-r609-0d91665/
-      py_package/
-        out.dat             # Example data file from test_regress.sh
-        index.html          # Example web page from test_regress.sh
-      other_package/
-        big_data.dat        # More data
+      # Regression outputs, copied from outputs/ by post_regress* scripts
+      regress/
+        py_package/
+          out.dat             # Example data file from test_regress.sh
+          index.html          # Example web page from test_regress.sh
+        other_package/
+          big_data.dat        # More data
 
 Selecting tests
 ^^^^^^^^^^^^^^^
@@ -433,6 +431,102 @@ Another complicated example is in the
 `Ska.engarchive <https://github.com/sot/ska_testr/tree/master/packages/Ska.engarchive>`_
 package.  This one is slightly different because it generates new database
 values and then immediately compares with the current production database.
+
+
+Summary Logs
+^^^^^^^^^^^^
+
+Testr produces a summary log which includes all tests run. It parses the logs produced by pytest, and tests are grouped
+in suites following the test hierarchy. Tests that do not use pytest are grouped in a test suite at the top level.
+The log is written in JSON format and looks something like the following:
+
+.. code-block:: JSON
+
+    {
+      "test_suite": {
+        "name": "Quaternion-tests",
+        "package": "Quaternion",
+        "test_cases": [
+          {
+            "name": "post_check_logs.py",
+            "file": "Quaternion/post_check_logs.py",
+            "timestamp": "2020:06:16T09:43:13",
+            "log": "Quaternion/post_check_logs.py.log",
+            "status": "fail",
+            "failure": {
+              "message": "post_check_logs.py failed",
+              "output": null
+            }
+          }
+        ],
+        "timestamp": "2020:06:16T09:43:13",
+        "properties": {
+          "system": "Darwin",
+          "architecture": "64bit",
+          "hostname": "saos-MacBook-Pro.local",
+          "platform": "Darwin-19.5.0",
+          "package": "Quaternion",
+          "package_version": "3.5.2.dev9+g7ee8b10.d20200616",
+          "t_start": "2020:06:16T09:43:13",
+          "t_stop": "2020:06:16T09:43:14",
+          "regress_dir": null,
+          "out_dir": "Quaternion"
+        }
+      },
+      "test_suites": [
+        {
+          "test_cases": [
+            {
+              "name": "test_shape",
+              "classname": "Quaternion.tests.test_all",
+              "file": "Quaternion/tests/test_all.py",
+              "line": "43",
+              "status": "pass"
+            },
+            {
+              "name": "test_init_exceptions",
+              "classname": "Quaternion.tests.test_all",
+              "file": "Quaternion/tests/test_all.py",
+              "line": "50",
+              "failure": {
+                "message": "Exception: Unexpected exception here",
+                "output": "def test_init_exceptions():\n>       raise Exception('Unexpected exception here')\nE       Exception: Unexpected exception here\n\nQuaternion/tests/test_all.py:52: Exception"
+              },
+              "status": "fail"
+            },
+            {
+              "name": "test_from_q",
+              "classname": "Quaternion.tests.test_all",
+              "file": "Quaternion/tests/test_all.py",
+              "line": "83",
+              "skipped": {
+                "message": "no way of currently testing this",
+                "output": "Quaternion/tests/test_all.py:83: <py._xmlgen.raw object at 0x7f9ca044fb38>"
+              },
+              "status": "skipped"
+            }
+          ],
+          "name": "Quaternion-pytest",
+          "properties": {
+            "system": "Darwin",
+            "architecture": "64bit",
+            "hostname": "saos-MacBook-Pro.local",
+            "platform": "Darwin-19.5.0",
+            "package": "Quaternion",
+            "package_version": "3.5.2.dev9+g7ee8b10.d20200616",
+            "t_start": "2020:06:16T09:43:11",
+            "t_stop": "2020:06:16T09:43:13",
+            "regress_dir": null,
+            "out_dir": "Quaternion"
+          },
+          "log": "Quaternion/test_unit.py.log",
+          "hostname": "saos-MacBook-Pro.local",
+          "timestamp": "2020:06:16T09:43:11",
+          "package": "Quaternion",
+          "file": "Quaternion/test_unit.py"
+        }
+      ]
+    }
 
 
 Python testing helpers
