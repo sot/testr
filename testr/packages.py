@@ -431,7 +431,7 @@ def write_log(tests, include_stdout=False):
             'date': datetime.datetime.now().strftime('%Y:%m:%dT%H:%M:%S'),
             'argv': sys.argv,
             'ska_version': ska_version,
-            'test_spec': str(os.path.basename(opt.test_spec))
+            'test_spec': os.path.basename(str(opt.test_spec))
         }
     }
     if all_test_suites:
