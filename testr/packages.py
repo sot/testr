@@ -627,3 +627,7 @@ def main():
         box_output(results.pformat(max_lines=-1, max_width=-1))
 
     write_log(tests)
+
+
+if __name__ == '__main__':
+    main()
