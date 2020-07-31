@@ -18,7 +18,10 @@ PYTEST_IGNORE_WARNINGS = (
     '-Wignore:the imp module is deprecated in favour of importlib:DeprecationWarning',
 
     # Shows up in setuptools_scm
-    '-Wignore:parse functions are required to provide a named:PendingDeprecationWarning')
+    '-Wignore:parse functions are required to provide a named:PendingDeprecationWarning',
+
+    # Shows up in sparkles from importing bleach
+    '-Wignore:Using or importing the ABCs:DeprecationWarning')
 
 
 class TestError(Exception):
