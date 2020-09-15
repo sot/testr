@@ -1,0 +1,282 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>testr.runner &#8212; testr 4.3.2.dev57+g94e382f documentation</title>
+    <link rel="stylesheet" href="../../_static/bootstrap-astropy.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/sidebar.js"></script>
+    <script type="text/javascript" src="../../_static/copybutton.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,600' rel='stylesheet' type='text/css'/>
+
+  </head><body>
+<div class="topbar">
+  <a class="brand" title="Documentation Home" href="../../index.html"><span id="logotext1">Ska!</span><span id="logotext2">testr</span><span id="logotext3"></span></a>
+  <ul>
+    
+    <li><a class="home" title="Homepage" href="">
+        <span id="logotext1"></span><span id="logotext2"></span>
+    </a></li>
+    <li><a title="General Index" href="../../genindex.html">Index</a></li>
+    <li><a title="Module Index" href="../../py-modindex.html">Modules</a></li>
+    <li>
+      
+      
+<form action="../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+      
+    </li>
+  </ul>
+</div>
+
+<div class="related">
+    <h3>Navigation</h3>
+    <ul>
+      <li>
+	<a href="../../index.html">testr 4.3.2.dev57+g94e382f documentation</a>
+	 &#187;
+      </li>
+      <li><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+      
+       
+    </ul>
+</div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for testr.runner</h1><div class="highlight"><pre>
+<span></span>
+<span class="c1"># Licensed under a 3-clause BSD style license - see LICENSE.rst</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Provide a test() function that can be called from package __init__.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+
+<span class="c1"># Pytest args for main() to ignore several warnings that show up regularly in</span>
+<span class="c1"># testing but can be ignored.</span>
+<span class="n">PYTEST_IGNORE_WARNINGS</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="c1"># See https://github.com/numpy/numpy/issues/11788 for why the numpy.ufunc</span>
+    <span class="c1"># warning is apparently OK.</span>
+    <span class="s1">&#39;-Wignore:numpy.ufunc size changed:RuntimeWarning&#39;</span><span class="p">,</span>
+
+    <span class="c1"># Shows up in upstream packages including ipyparallel</span>
+    <span class="s1">&#39;-Wignore:the imp module is deprecated in favour of importlib:DeprecationWarning&#39;</span><span class="p">,</span>
+
+    <span class="c1"># Shows up in setuptools_scm</span>
+    <span class="s1">&#39;-Wignore:parse functions are required to provide a named:PendingDeprecationWarning&#39;</span><span class="p">,</span>
+
+    <span class="c1"># Shows up in sparkles from importing bleach</span>
+    <span class="s1">&#39;-Wignore:Using or importing the ABCs:DeprecationWarning&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="TestError"><a class="viewcode-back" href="../../index.html#testr.runner.TestError">[docs]</a><span class="k">class</span> <span class="nc">TestError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="testr"><a class="viewcode-back" href="../../index.html#testr.runner.testr">[docs]</a><span class="k">def</span> <span class="nf">testr</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Run py.test unit tests for the calling package.  This just calls the ``test()``</span>
+<span class="sd">    function but includes defaults that are more appropriate for integrated package</span>
+<span class="sd">    testing using run_testr.</span>
+
+<span class="sd">    :param \*args: positional args to pass to pytest</span>
+<span class="sd">    :param raise_exception: test failures raise an exception (default=True)</span>
+<span class="sd">    :param package_from_dir: set package name from parent directory name (default=True)</span>
+<span class="sd">    :param verbose: run pytest in verbose (-v) mode (default=True)</span>
+<span class="sd">    :param show_output: run pytest in show output (-s) mode (default=True)</span>
+<span class="sd">    :param \*\*kwargs: additional keyword args to pass to pytest</span>
+
+<span class="sd">    :returns: number of test failures</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">kwarg</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;raise_exception&#39;</span><span class="p">,</span> <span class="s1">&#39;package_from_dir&#39;</span><span class="p">,</span> <span class="s1">&#39;verbose&#39;</span><span class="p">,</span> <span class="s1">&#39;show_output&#39;</span><span class="p">):</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">kwarg</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># test() function looks up the calling stack to find the calling package name.</span>
+    <span class="c1"># It will be two levels up.</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;stack_level&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+
+    <span class="k">return</span> <span class="n">test</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test"><a class="viewcode-back" href="../../index.html#testr.runner.test">[docs]</a><span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Run py.test unit tests for the calling package with specified</span>
+<span class="sd">    ``args`` and ``kwargs``.</span>
+
+<span class="sd">    This temporarily changes to the directory above the installed package</span>
+<span class="sd">    directory and effectively runs ``py.test &lt;packagename&gt; &lt;args&gt; &lt;kwargs&gt;``.</span>
+
+<span class="sd">    If the kwarg ``raise_exception=True`` is provided then any test</span>
+<span class="sd">    failures will result in an exception being raised.  This can be</span>
+<span class="sd">    used to make a shell-level failure.</span>
+
+<span class="sd">    :param \*args: positional args to pass to pytest</span>
+<span class="sd">    :param raise_exception: test failures raise an exception (default=False)</span>
+<span class="sd">    :param package_from_dir: set package name from parent directory name (default=False)</span>
+<span class="sd">    :param verbose: run pytest in verbose (-v) mode (default=False)</span>
+<span class="sd">    :param show_output: run pytest in show output (-s) mode (default=False)</span>
+<span class="sd">    :param \*\*kwargs: additional keyword args to pass to pytest</span>
+
+<span class="sd">    :returns: number of test failures</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Local imports so that imports only get done when really needed.</span>
+    <span class="kn">import</span> <span class="nn">os</span>
+    <span class="kn">import</span> <span class="nn">inspect</span>
+    <span class="kn">import</span> <span class="nn">pytest</span>
+    <span class="kn">import</span> <span class="nn">contextlib</span>
+
+    <span class="c1"># Copied from Ska.File to reduce import footprint and limit to only standard</span>
+    <span class="c1"># modules.</span>
+    <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+    <span class="k">def</span> <span class="nf">chdir</span><span class="p">(</span><span class="n">dirname</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Context manager to run block within `dirname` directory.  The current</span>
+<span class="sd">        directory is restored even if the block raises an exception.</span>
+
+<span class="sd">        :param dirname: Directory name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">curdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">dirname</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span>
+            <span class="k">yield</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">curdir</span><span class="p">)</span>
+
+    <span class="n">raise_exception</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;raise_exception&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="n">package_from_dir</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;package_from_dir&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="n">get_version</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;get_version&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s1">&#39;TESTR_PYTEST_ARGS&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">args</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;TESTR_PYTEST_ARGS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+
+    <span class="n">arg_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">args</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;verbose&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">&#39;-v&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">args</span> <span class="ow">and</span> <span class="s1">&#39;-q&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">arg_names</span><span class="p">:</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">args</span> <span class="o">+</span> <span class="p">(</span><span class="s1">&#39;-v&#39;</span><span class="p">,)</span>
+    <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;show_output&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">&#39;-s&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">args</span> <span class="ow">and</span> <span class="s1">&#39;--capture&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">arg_names</span><span class="p">:</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">args</span> <span class="o">+</span> <span class="p">(</span><span class="s1">&#39;-s&#39;</span><span class="p">,)</span>
+
+    <span class="n">args</span> <span class="o">=</span> <span class="n">args</span> <span class="o">+</span> <span class="n">PYTEST_IGNORE_WARNINGS</span>
+
+    <span class="k">if</span> <span class="s1">&#39;TESTR_OUT_DIR&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span> <span class="ow">and</span> <span class="s1">&#39;TESTR_FILE&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+        <span class="n">report_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;TESTR_OUT_DIR&#39;</span><span class="p">],</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;TESTR_FILE&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">.xml&quot;</span><span class="p">)</span>
+        <span class="n">args</span> <span class="o">+=</span> <span class="p">(</span><span class="sa">f</span><span class="s1">&#39;--junit-xml=</span><span class="si">{</span><span class="n">report_file</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,)</span>
+        <span class="n">args</span> <span class="o">+=</span> <span class="p">(</span><span class="s1">&#39;-o&#39;</span><span class="p">,</span> <span class="s1">&#39;junit_family=xunit2&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Disable caching of test results to prevent users trying to write into</span>
+    <span class="c1"># flight directory if tests fail running on installed package.</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">args</span> <span class="o">+</span> <span class="p">(</span><span class="s1">&#39;-p&#39;</span><span class="p">,</span> <span class="s1">&#39;no:cacheprovider&#39;</span><span class="p">)</span>
+
+    <span class="n">stack_level</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;stack_level&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">calling_frame_record</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">stack</span><span class="p">()[</span><span class="n">stack_level</span><span class="p">]</span>  <span class="c1"># Only works for stack-based Python</span>
+    <span class="n">calling_func_file</span> <span class="o">=</span> <span class="n">calling_frame_record</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">package_from_dir</span><span class="p">:</span>
+        <span class="c1"># In this case it is assumed that the module which called this function is</span>
+        <span class="c1"># located in a directory named by the package that is to be tested.  I.e.</span>
+        <span class="c1"># chandra_aca/test.py.  However, this is NOT the actual package directory</span>
+        <span class="c1"># so we have to import the package to get its parent directory.</span>
+        <span class="kn">import</span> <span class="nn">importlib</span>
+        <span class="n">package</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">calling_func_file</span><span class="p">)))</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">package</span><span class="p">)</span>
+        <span class="n">calling_func_file</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="vm">__file__</span>
+        <span class="n">calling_func_module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="vm">__name__</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># In this case the module that called this function is the package __init__.py.</span>
+        <span class="c1"># We get the module directly without doing another import.</span>
+        <span class="n">calling_frame</span> <span class="o">=</span> <span class="n">calling_frame_record</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">calling_frame_filename</span> <span class="o">=</span> <span class="n">calling_frame_record</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">calling_func_name</span> <span class="o">=</span> <span class="n">calling_frame_record</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">calling_func_module</span> <span class="o">=</span> <span class="n">calling_frame</span><span class="o">.</span><span class="n">f_globals</span><span class="p">[</span><span class="n">calling_func_name</span><span class="p">]</span><span class="o">.</span><span class="vm">__module__</span>
+        <span class="k">if</span> <span class="n">get_version</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">get_full_version</span><span class="p">(</span><span class="n">calling_frame</span><span class="o">.</span><span class="n">f_globals</span><span class="p">,</span>
+                                    <span class="n">calling_frame_filename</span><span class="p">)</span>
+
+    <span class="n">pkg_names</span> <span class="o">=</span> <span class="n">calling_func_module</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+    <span class="n">pkg_paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">calling_func_file</span><span class="p">)]</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;..&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">pkg_names</span><span class="p">)</span>
+    <span class="n">pkg_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="o">*</span><span class="n">pkg_names</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">chdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="o">*</span><span class="n">pkg_paths</span><span class="p">)):</span>
+        <span class="n">n_fail</span> <span class="o">=</span> <span class="n">pytest</span><span class="o">.</span><span class="n">main</span><span class="p">([</span><span class="n">pkg_dir</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">n_fail</span> <span class="ow">and</span> <span class="n">raise_exception</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">TestError</span><span class="p">(</span><span class="s1">&#39;got </span><span class="si">{}</span><span class="s1"> failure(s)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n_fail</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">n_fail</span></div>
+
+
+<div class="viewcode-block" id="get_full_version"><a class="viewcode-back" href="../../index.html#testr.runner.get_full_version">[docs]</a><span class="k">def</span> <span class="nf">get_full_version</span><span class="p">(</span><span class="n">calling_frame_globals</span><span class="p">,</span> <span class="n">calling_frame_filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a full version which includes git info if the module was imported</span>
+<span class="sd">    from the git repo source directory.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">release_version</span> <span class="o">=</span> <span class="n">calling_frame_globals</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;__version__&#39;</span><span class="p">,</span> <span class="s1">&#39;unknown&#39;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">subprocess</span> <span class="kn">import</span> <span class="n">Popen</span><span class="p">,</span> <span class="n">PIPE</span>
+        <span class="n">filedir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">calling_frame_filename</span><span class="p">))</span>
+
+        <span class="n">p</span> <span class="o">=</span> <span class="n">Popen</span><span class="p">([</span><span class="s1">&#39;git&#39;</span><span class="p">,</span> <span class="s1">&#39;rev-list&#39;</span><span class="p">,</span> <span class="s1">&#39;HEAD&#39;</span><span class="p">],</span>
+                  <span class="n">cwd</span><span class="o">=</span><span class="n">filedir</span><span class="p">,</span>
+                  <span class="n">stdout</span><span class="o">=</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stdin</span><span class="o">=</span><span class="n">PIPE</span><span class="p">)</span>
+        <span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+        <span class="n">stdout</span> <span class="o">=</span> <span class="n">stdout</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">revs</span> <span class="o">=</span> <span class="n">stdout</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">release_version</span> <span class="o">+</span> <span class="s1">&#39;-r</span><span class="si">{}</span><span class="s1">-</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">revs</span><span class="p">),</span> <span class="n">revs</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="mi">7</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">release_version</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">release_version</span>
+
+    <span class="k">return</span> <span class="n">out</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><h3>Page Contents</h3>
+
+
+<form action="../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+<footer class="footer">
+  <p class="pull-right"> &nbsp;
+    <a href="#">Back to Top</a></p>
+  <p>
+    &copy; Copyright 2016, Tom Aldcroft.<br/>
+    Created using <a href="http://www.sphinx-doc.org/en/stable/">Sphinx</a> 3.1.2. &nbsp;
+  </p>
+</footer>
+  </body>
+</html>

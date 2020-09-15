@@ -1,0 +1,839 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>testr &#8212; testr 4.3.2.dev57+g94e382f documentation</title>
+    <link rel="stylesheet" href="_static/bootstrap-astropy.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script type="text/javascript" src="_static/sidebar.js"></script>
+    <script type="text/javascript" src="_static/copybutton.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,600' rel='stylesheet' type='text/css'/>
+
+  </head><body>
+<div class="topbar">
+  <a class="brand" title="Documentation Home" href="#"><span id="logotext1">Ska!</span><span id="logotext2">testr</span><span id="logotext3"></span></a>
+  <ul>
+    
+    <li><a class="home" title="Homepage" href="">
+        <span id="logotext1"></span><span id="logotext2"></span>
+    </a></li>
+    <li><a title="General Index" href="genindex.html">Index</a></li>
+    <li><a title="Module Index" href="py-modindex.html">Modules</a></li>
+    <li>
+      
+      
+<form action="search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+      
+    </li>
+  </ul>
+</div>
+
+<div class="related">
+    <h3>Navigation</h3>
+    <ul>
+      <li>
+	<a href="#">testr 4.3.2.dev57+g94e382f documentation</a>
+	 &#187;
+      </li>
+      
+       
+    </ul>
+</div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="testr">
+<h1>testr<a class="headerlink" href="#testr" title="Permalink to this headline">¶</a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">testr</span></code> package provides a framework for unit, regression, and integration
+testing of a set of packages within a production runtime environment.  The
+primary component of <code class="docutils literal notranslate"><span class="pre">testr</span></code> is lightweight testing script and file structure
+definition that simple but can support complex testing as needed.  The secondary
+component is a couple of helper functions that make it easier to define and run
+Python package unit tests.  This includes a <code class="docutils literal notranslate"><span class="pre">test_helper</span></code> module with some
+helper functions.</p>
+<div class="toctree-wrapper compound">
+</div>
+<div class="section" id="package-testing-unit-regression-integration">
+<h2>Package testing: unit, regression, integration<a class="headerlink" href="#package-testing-unit-regression-integration" title="Permalink to this headline">¶</a></h2>
+<p>The use case here is a production environment where one has the capability (and indeed
+requirement) to build and test within a testing environment prior to deploying to
+production.  The starting assumption is that the <code class="docutils literal notranslate"><span class="pre">testr</span></code> package is installed in the
+test environment and that all new or updated packages have also been installed to the
+environment.</p>
+<p>Package testing and definition in the <code class="docutils literal notranslate"><span class="pre">testr</span></code> framework is done entirely by convention
+rather than configuration.  What this means is that there is a certain directory structure
+and file naming convention that must be followed and which controls how testing is done.
+There are no configuration files at all.</p>
+<p>The following definitions are provided to give a general feel for the different
+styles of testing supported here.  The definitions are by no means
+rigorous and there is certainly overlap.</p>
+<p><strong>Unit</strong> testing refers to dedicated tests of individual package functionality
+that are conceptually independent of the environment and result in an immediate
+pass/fail for each test.</p>
+<p><strong>Regression</strong> testing refers to tests that typically produce output files which are then
+compared against reference outputs.  The <code class="docutils literal notranslate"><span class="pre">testr</span></code> package contains functions
+to facilitate this process by munging the outputs to remove uninteresting
+differences (like time stamps or the user who ran a script).</p>
+<p><strong>Integration</strong> testing refers to ensuring that the packages work within an
+updated environment.  This overlaps with unit and regression testing, but
+is linked to potential cross-package issues.  A key example is updating
+a core package that may produce unexpected results or issue deprecation
+warnings downstream that are not desirable.</p>
+<div class="section" id="basic-structure">
+<h3>Basic structure<a class="headerlink" href="#basic-structure" title="Permalink to this headline">¶</a></h3>
+<p>When <code class="docutils literal notranslate"><span class="pre">testr</span></code> is installed it creates a console script <code class="docutils literal notranslate"><span class="pre">run_testr</span></code> that can
+be run from the command line in your environment testing directory.  This
+directory can be anywhere, but as we will see the ideal setup is to have this
+be a git / GitHub repository.</p>
+<p>A full-featured example of the environment testing setup is in the <a class="reference external" href="https://github.com/sot/ska_testr">ska_testr</a> GitHub repository.  A more minimal example would be:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">get_version_id</span>            <span class="c1"># Executable script or program</span>
+<span class="n">packages</span><span class="o">/</span>
+  <span class="n">py_package</span><span class="o">/</span>             <span class="c1"># py_package is a Python package</span>
+    <span class="n">helper_script</span><span class="o">.</span><span class="n">py</span>      <span class="c1"># Helper script called by test_regress.sh</span>
+    <span class="n">test_unit</span><span class="o">.</span><span class="n">py</span>          <span class="c1"># Run built-in unit tests for my</span>
+    <span class="n">test_regress</span><span class="o">.</span><span class="n">sh</span>       <span class="c1"># Additional regression tests for integration testing</span>
+    <span class="n">post_regress</span><span class="o">.</span><span class="n">py</span>       <span class="c1"># Copy regression output files to the regress/ directory</span>
+    <span class="n">post_check_logs</span><span class="o">.</span><span class="n">py</span>    <span class="c1"># Check logs for &quot;warning&quot; or &quot;error&quot;</span>
+
+  <span class="n">other_package</span><span class="o">/</span>          <span class="c1"># Some package without unit tests</span>
+    <span class="n">test_regress_long</span><span class="o">.</span><span class="n">sh</span>  <span class="c1"># Long-running regression test that isn&#39;t run every time</span>
+    <span class="n">post_regress_long</span><span class="o">.</span><span class="n">py</span>  <span class="c1"># Copy regression output files to the regress/ directory</span>
+</pre></div>
+</div>
+<div class="section" id="get-version-id">
+<h4>get_version_id<a class="headerlink" href="#get-version-id" title="Permalink to this headline">¶</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">get_version_id</span></code> file must be an executable script or program that produces
+a single line of output corresponding to a unique version identifier for the
+environment.  This is used to organize the outputs by version and later to
+compare the regression outputs.  In the Ska runtime environment this script
+produces a version identifier like <code class="docutils literal notranslate"><span class="pre">0.18-r609-0d91665</span></code>.</p>
+</div>
+<div class="section" id="packages">
+<h4>Packages<a class="headerlink" href="#packages" title="Permalink to this headline">¶</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">packages</span></code> directory must contain sub-directories corresponding to
+each package being explicitly tested.  For Python packages the directory
+name should be the same as the importable package name.  This allows the
+simple unit testing idiom (shown later) to infer the package name to import.</p>
+</div>
+<div class="section" id="test-scripts">
+<h4>Test scripts<a class="headerlink" href="#test-scripts" title="Permalink to this headline">¶</a></h4>
+<p>Test scripts are located within the package sub-directory.  The key concept to understand
+here is that the tests consist entirely of scripts or executable files that have the
+following properties:</p>
+<ul class="simple">
+<li><p>File name begins with <code class="docutils literal notranslate"><span class="pre">test_</span></code>.</p></li>
+<li><p>File is either a Python script (<code class="docutils literal notranslate"><span class="pre">test_*.py</span></code>), Bash script (<code class="docutils literal notranslate"><span class="pre">test_*.sh</span></code>),
+or an executable file.</p></li>
+<li><p>When run the test file returns a successful exit status (0) for PASS and
+a non-successful exit status (not 0) for FAIL.</p></li>
+<li><p>Tests are run in alphabetical order.</p></li>
+</ul>
+<p>Those are the only rules, so the testing can run the gamut from simple
+to arbitrarily complex.</p>
+</div>
+<div class="section" id="post-processing-scripts">
+<h4>Post-processing scripts<a class="headerlink" href="#post-processing-scripts" title="Permalink to this headline">¶</a></h4>
+<p>After the tests are run then any post-processing scripts in the package directory will be
+run (again in alphabetical order).  These are exactly the same as test files except:</p>
+<ul class="simple">
+<li><p>File name begins with <code class="docutils literal notranslate"><span class="pre">post_</span></code>.</p></li>
+<li><p>Post-processing scripts will be run <em>after</em> all the test scripts are done.</p></li>
+</ul>
+<p>A key point is that the post-processing scripts can generate failures. For
+instance a common task is checking the output log files for unexpected warnings
+that do not generate a failure.</p>
+</div>
+<div class="section" id="environment-variables">
+<h4>Environment variables<a class="headerlink" href="#environment-variables" title="Permalink to this headline">¶</a></h4>
+<p>Several environment variables are defined prior to spawning jobs that run the
+test or post-processing scripts.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 72%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Name</p></th>
+<th class="head"><p>Definition</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>TESTR_REGRESS_DIR</p></td>
+<td><p>Regression output directory for this package</p></td>
+</tr>
+<tr class="row-odd"><td><p>TESTR_INTERPRETER</p></td>
+<td><p>Interpreter that will be used (python, bash, or None)</p></td>
+</tr>
+<tr class="row-even"><td><p>TESTR_PACKAGE</p></td>
+<td><p>Package name</p></td>
+</tr>
+<tr class="row-odd"><td><p>TESTR_PACKAGES_REPO</p></td>
+<td><p>URL root for cloning package repo</p></td>
+</tr>
+<tr class="row-even"><td><p>TESTR_FILE</p></td>
+<td><p>Script file name</p></td>
+</tr>
+<tr class="row-odd"><td><p>TESTR_OUT_DIR</p></td>
+<td><p>Testing output directory for this package</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="filename-conventions">
+<h4>Filename conventions<a class="headerlink" href="#filename-conventions" title="Permalink to this headline">¶</a></h4>
+<p>There are no <em>required</em> conventions beyond the previously mentioned rules, but
+following some simple conventions will make life easier and more organized.  This
+is especially true because of the way that tests are selected based on the
+file name and the <code class="docutils literal notranslate"><span class="pre">--include</span></code> and <code class="docutils literal notranslate"><span class="pre">--exclude</span></code> arguments of <code class="docutils literal notranslate"><span class="pre">run_testr</span></code>.
+The table below shows keywords that are included in the file name, separated
+by underscores.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 81%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Keywords</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>unit</p></td>
+<td><p>Run built-in unit tests</p></td>
+</tr>
+<tr class="row-odd"><td><p>regress</p></td>
+<td><p>Regression tests that compare to reference outputs</p></td>
+</tr>
+<tr class="row-even"><td><p>git</p></td>
+<td><p>Test that requires cloning a git repo to run</p></td>
+</tr>
+<tr class="row-odd"><td><p>long</p></td>
+<td><p>Long-running test that does not need to be run every time</p></td>
+</tr>
+</tbody>
+</table>
+<p>Standard filenames and examples of the keywords are shown in the example
+directory structure above.</p>
+</div>
+</div>
+<div class="section" id="running-the-tests">
+<h3>Running the tests<a class="headerlink" href="#running-the-tests" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">run_testr</span></code> command has the following options:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ run_testr --help
+usage: run_testr [-h] [--test-spec TEST_SPEC] [--root ROOT]
+                 [--outputs-dir OUTPUTS_DIR] [--include INCLUDES]
+                 [--exclude EXCLUDES] [--collect-only]
+                 [--packages-repo PACKAGES_REPO] [--overwrite]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --test-spec TEST_SPEC
+                        Test include/exclude specification (default=None)
+  --root ROOT           Directory containing standard testr configuration
+  --outputs-dir OUTPUTS_DIR
+                        Directory containing all output package test
+                        runs. Absolute, or relative to CWD
+  --include INCLUDES    Include tests that match glob pattern
+  --exclude EXCLUDES    Exclude tests that match glob pattern
+  --collect-only        Collect tests but do not run
+  --packages-repo PACKAGES_REPO
+                        Base URL for package git repos
+  --overwrite           Overwrite existing outputs directory instead of
+                        deleting
+</pre></div>
+</div>
+<p>For the example directory structure, doing <code class="docutils literal notranslate"><span class="pre">run_testr</span></code> (with no custom options) would
+run the tests, reporting test status for each test and then finish with a summary of test
+status like so:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">*************************************************</span>
+<span class="o">***</span>    <span class="n">Package</span>           <span class="n">Script</span>        <span class="n">Status</span> <span class="o">***</span>
+<span class="o">***</span> <span class="o">-------------</span> <span class="o">--------------------</span> <span class="o">------</span> <span class="o">***</span>
+<span class="o">***</span> <span class="n">other_package</span> <span class="n">test_regress_long</span><span class="o">.</span><span class="n">sh</span>   <span class="k">pass</span> <span class="o">***</span>
+<span class="o">***</span> <span class="n">other_package</span> <span class="n">post_regress_long</span><span class="o">.</span><span class="n">py</span>   <span class="k">pass</span> <span class="o">***</span>
+<span class="o">***</span>    <span class="n">py_package</span>      <span class="n">test_regress</span><span class="o">.</span><span class="n">sh</span>   <span class="k">pass</span> <span class="o">***</span>
+<span class="o">***</span>    <span class="n">py_package</span>         <span class="n">test_unit</span><span class="o">.</span><span class="n">py</span>   <span class="k">pass</span> <span class="o">***</span>
+<span class="o">***</span>    <span class="n">py_package</span>   <span class="n">post_check_logs</span><span class="o">.</span><span class="n">py</span>   <span class="k">pass</span> <span class="o">***</span>
+<span class="o">***</span>    <span class="n">py_package</span>      <span class="n">post_regress</span><span class="o">.</span><span class="n">py</span>   <span class="k">pass</span> <span class="o">***</span>
+<span class="o">*************************************************</span>
+</pre></div>
+</div>
+<p>The working directory would contain the following new sub-directories.  The first step in
+processing is to copy the test and post-process scripts from <code class="docutils literal notranslate"><span class="pre">packages</span></code> into
+<code class="docutils literal notranslate"><span class="pre">outputs/&lt;version_id&gt;</span></code>, where <code class="docutils literal notranslate"><span class="pre">&lt;version_id&gt;</span></code> is the output of <code class="docutils literal notranslate"><span class="pre">get_version_id</span></code>.  The
+scripts are then run from that directory, so they are free to write outputs directly into
+the current directory or any sub-directories therein.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Testing and post-process scripts and outputs</span>
+<span class="n">outputs</span><span class="o">/</span>
+  <span class="n">last</span> <span class="o">-&gt;</span> <span class="mf">0.18</span><span class="o">-</span><span class="n">r609</span><span class="o">-</span><span class="mi">0</span><span class="n">d91665</span>
+  <span class="mf">0.18</span><span class="o">-</span><span class="n">r609</span><span class="o">-</span><span class="mi">0</span><span class="n">d91665</span><span class="o">/</span>
+    <span class="n">logs</span><span class="o">/</span>
+      <span class="n">all_tests</span><span class="o">.</span><span class="n">json</span>        <span class="c1"># Master log file in JUnit&#39;s XML format</span>
+      <span class="n">test</span><span class="o">.</span><span class="n">log</span>              <span class="c1"># Master log file of test processing and results</span>
+      <span class="n">py_package</span><span class="o">/</span>
+        <span class="n">helper_script</span><span class="o">.</span><span class="n">py</span>
+        <span class="n">test_unit</span><span class="o">.</span><span class="n">py</span>
+        <span class="n">test_unit</span><span class="o">.</span><span class="n">py</span><span class="o">.</span><span class="n">log</span>    <span class="c1"># Log file from running test_unit.py</span>
+        <span class="n">test_regress</span><span class="o">.</span><span class="n">sh</span>
+        <span class="n">test_regress</span><span class="o">.</span><span class="n">sh</span><span class="o">.</span><span class="n">log</span> <span class="c1"># Log file</span>
+        <span class="n">post_regress</span><span class="o">.</span><span class="n">py</span>
+        <span class="n">post_regress</span><span class="o">.</span><span class="n">py</span><span class="o">.</span><span class="n">log</span> <span class="c1"># Log file</span>
+        <span class="n">post_check_logs</span><span class="o">.</span><span class="n">py</span>
+        <span class="n">post_check_logs</span><span class="o">.</span><span class="n">py</span><span class="o">.</span><span class="n">log</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">dat</span>             <span class="c1"># Example data file from test_regress.sh</span>
+        <span class="n">index</span><span class="o">.</span><span class="n">html</span>          <span class="c1"># Example web page from test_regress.sh</span>
+      <span class="n">other_package</span><span class="o">/</span>
+        <span class="n">test_regress_long</span><span class="o">.</span><span class="n">sh</span>
+        <span class="n">test_regress_long</span><span class="o">.</span><span class="n">sh</span><span class="o">.</span><span class="n">log</span>
+        <span class="n">post_regress_long</span><span class="o">.</span><span class="n">py</span>
+        <span class="n">post_regress_long</span><span class="o">.</span><span class="n">py</span><span class="o">.</span><span class="n">log</span>
+        <span class="n">big_data</span><span class="o">.</span><span class="n">dat</span>        <span class="c1"># More data</span>
+
+    <span class="c1"># Regression outputs, copied from outputs/ by post_regress* scripts</span>
+    <span class="n">regress</span><span class="o">/</span>
+      <span class="n">py_package</span><span class="o">/</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">dat</span>             <span class="c1"># Example data file from test_regress.sh</span>
+        <span class="n">index</span><span class="o">.</span><span class="n">html</span>          <span class="c1"># Example web page from test_regress.sh</span>
+      <span class="n">other_package</span><span class="o">/</span>
+        <span class="n">big_data</span><span class="o">.</span><span class="n">dat</span>        <span class="c1"># More data</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="selecting-tests">
+<h3>Selecting tests<a class="headerlink" href="#selecting-tests" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">--include</span></code> and <code class="docutils literal notranslate"><span class="pre">--exclude</span></code> options can be used to select specific tests and
+post-process scripts.  The default is to include all files.</p>
+<p>The values for both options are a comma-separated list of shell file “glob” patterns
+that are used to match files.  The selection filtering first finds all files that
+match the <code class="docutils literal notranslate"><span class="pre">--include</span></code> argument (which defaults to <code class="docutils literal notranslate"><span class="pre">*</span></code>), and then removes any
+files that match the <code class="docutils literal notranslate"><span class="pre">--exclude</span></code> argument (which defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code>).</p>
+<p>The glob patterns are compared to the full filename that includes the package name
+and test name, for instance <code class="docutils literal notranslate"><span class="pre">py_package/test_regress.sh</span></code>.</p>
+<p>For practical convenience, any specified values (e.g. <code class="docutils literal notranslate"><span class="pre">py_package</span></code>) automatically
+have a <code class="docutils literal notranslate"><span class="pre">*</span></code> appended.  Some examples:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ run_testr --include=py_package  # py_package (but also py_package_2)
+$ run_testr --include=py_package/  # py_package only
+$ run_testr --exclude=py_package/  # exclude py_package but run all others
+$ run_testr --exclude=&#39;*_long&#39;    # exclude long tests
+$ run_testr --exclude=&#39;*_long,*_unit&#39; # exclude long and unit tests
+</pre></div>
+</div>
+</div>
+<div class="section" id="comparing-regression-outputs">
+<h3>Comparing regression outputs<a class="headerlink" href="#comparing-regression-outputs" title="Permalink to this headline">¶</a></h3>
+<p>In this example the 0.18-r609-0d91665 regress outputs might correspond to
+the current production installation.  Then suppose you create a test
+environment with version id <code class="docutils literal notranslate"><span class="pre">0.19-r610-1b65555</span></code> and run the full
+test suite.  Then you can do:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ cd regress
+$ diff -r 0.18-r609-0d91665/ 0.19-r610-1b65555/
+...
+</pre></div>
+</div>
+<p>A key point is that effort should be made to clean the regression outputs
+to strip them of uninteresting diffs like a date or the user that ran the
+tests.  See the <a class="reference internal" href="#post-regress-py">post_regress.py</a> example for more discussion on that.</p>
+<p>One option from here is to copy the regress outputs into a git-versioned repo
+in a new branch and then use GitHub to do comparisons.</p>
+</div>
+<div class="section" id="test-specification-files">
+<h3>Test specification files<a class="headerlink" href="#test-specification-files" title="Permalink to this headline">¶</a></h3>
+<p>One might like to maintain a set of unit and regression tests in a single
+testing repository but to run somewhat different combinations of those tests in
+different circumstances.  For instance one testing environment might not have
+the necessary resources to run all tests.  The tests themselves might manage
+this (i.e. pytest “skip”) but it may be simpler and more explicit to
+manage these lists of tests directly.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">--test-spec</span></code> command line option provides a way to do this.  If you provide
+an option like <code class="docutils literal notranslate"><span class="pre">--test-spec=HEAD</span></code> then the following happens:</p>
+<ul class="simple">
+<li><p>A file in the current directory named <code class="docutils literal notranslate"><span class="pre">HEAD</span></code> is opened and read:</p>
+<ul>
+<li><p>It must contain a list of include / exclude specifications like those for
+the <code class="docutils literal notranslate"><span class="pre">-include</span></code> and <code class="docutils literal notranslate"><span class="pre">-exclude</span></code> options.</p></li>
+<li><p>The exclude specifications are preceded by a minus sign (<code class="docutils literal notranslate"><span class="pre">-</span></code>).</p></li>
+<li><p>Blank lines or those starting with <code class="docutils literal notranslate"><span class="pre">#</span></code> are ignored.</p></li>
+</ul>
+</li>
+<li><p>The test specification file include and exclude files are appended to any
+provided on the command line.</p></li>
+<li><p>The regression outputs are put into a sub-directory <code class="docutils literal notranslate"><span class="pre">HEAD</span></code> within the
+<code class="docutils literal notranslate"><span class="pre">regress</span></code> directory.</p></li>
+</ul>
+<p>Example test specification file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Includes</span>
+<span class="n">acisfp_check</span>
+<span class="n">dpa_check</span>
+
+<span class="c1"># Excludes</span>
+<span class="o">-*</span><span class="n">_long</span><span class="o">*</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="file-recipes">
+<h3>File recipes<a class="headerlink" href="#file-recipes" title="Permalink to this headline">¶</a></h3>
+<p>Here we show some example testing files taken from <a class="reference external" href="https://github.com/sot/ska_testr">ska_testr</a> GitHub repository in order to
+illustrate some useful recipes or idioms.</p>
+<div class="section" id="test-unit-py">
+<h4>test_unit.py<a class="headerlink" href="#test-unit-py" title="Permalink to this headline">¶</a></h4>
+<p>Python packages that have built-in (inline) unit tests (see <a class="reference internal" href="#python-testing-helpers">Python testing helpers</a>)
+can be tested with the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">testr</span>
+<span class="n">testr</span><span class="o">.</span><span class="n">testr</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This uses pytest to run the included tests for the package.  By default
+it provides flags to run in verbose mode with all test code output copied
+to the console.  This allows any stray warnings to be emitted.</p>
+<p>You can do the same thing without using the <code class="docutils literal notranslate"><span class="pre">testr.testr()</span></code> function as follows.
+The important thing is to raise an exception if there were test failures:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">xija</span>
+<span class="n">n_fail</span> <span class="o">=</span> <span class="n">xija</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="s1">&#39;-v&#39;</span><span class="p">,</span> <span class="s1">&#39;-s&#39;</span><span class="p">,</span> <span class="s1">&#39;-k not test_minusz&#39;</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">n_fail</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">n_fail</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; test failures&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="test-unit-git-sh">
+<h4>test_unit_git.sh<a class="headerlink" href="#test-unit-git-sh" title="Permalink to this headline">¶</a></h4>
+<p>Python packages that do not have inline unit tests or for other reasons
+require the source repo for unit testing can use the following recipe:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>/usr/bin/git clone ${TESTR_PACKAGES_REPO}/${TESTR_PACKAGE}
+cd ${TESTR_PACKAGE}
+git checkout master
+py.test -v -s
+</pre></div>
+</div>
+<p>This illustrates some environment variables that are always defined when
+running test code.</p>
+</div>
+<div class="section" id="post-regress-py">
+<h4>post_regress.py<a class="headerlink" href="#post-regress-py" title="Permalink to this headline">¶</a></h4>
+<p>Here is an example from the Ska <a class="reference external" href="https://github.com/sot/ska_testr/tree/master/packages/dpa_check">dpa_check test</a> that copies a few
+key outputs into the <code class="docutils literal notranslate"><span class="pre">regress</span></code> directory after stripping out the
+user name and run time.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">testr.packages</span> <span class="kn">import</span> <span class="n">make_regress_files</span>
+
+<span class="n">regress_files</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;out/index.rst&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;out/run.dat&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;out/states.dat&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;out/temperatures.dat&#39;</span><span class="p">]</span>
+
+<span class="n">clean</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;out/index.rst&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="sa">r</span><span class="s1">&#39;^Run time.*&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)],</span>
+         <span class="s1">&#39;out/run.dat&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="sa">r</span><span class="s1">&#39;#.*py run at.*&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)]}</span>
+
+<span class="n">make_regress_files</span><span class="p">(</span><span class="n">regress_files</span><span class="p">,</span> <span class="n">clean</span><span class="o">=</span><span class="n">clean</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="post-check-logs-py">
+<h4>post_check_logs.py<a class="headerlink" href="#post-check-logs-py" title="Permalink to this headline">¶</a></h4>
+<p>Here is an example again from the Ska <a class="reference external" href="https://github.com/sot/ska_testr/tree/master/packages/dpa_check">dpa_check test</a> that checks the
+test processing log files for any occurrences of <code class="docutils literal notranslate"><span class="pre">warning</span></code> or <code class="docutils literal notranslate"><span class="pre">error</span></code>.
+In this case there are a couple of lines where this is expected, so those
+matches are ignored.  Any other matches will raise an exception and signal
+a FAIL for this package:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">testr.packages</span> <span class="kn">import</span> <span class="n">check_files</span>
+
+<span class="n">check_files</span><span class="p">(</span><span class="s1">&#39;test_*.log&#39;</span><span class="p">,</span>
+            <span class="n">checks</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;warning&#39;</span><span class="p">,</span> <span class="s1">&#39;error&#39;</span><span class="p">],</span>
+            <span class="n">allows</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;99% quantile value of&#39;</span><span class="p">,</span> <span class="s1">&#39;in output at out&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="test-regress-long-sh">
+<h4>test_regress_long.sh<a class="headerlink" href="#test-regress-long-sh" title="Permalink to this headline">¶</a></h4>
+<p>This is an example that is not really a recipe but a demonstration of
+doing a complex regression test that requires some setup and uses
+several scripts to regenerate database tables from scratch.  It then
+uses a helper script those to write a subset of database contents
+in a clean ASCII format for regression comparisons.  This is in the
+<a class="reference external" href="https://github.com/sot/ska_testr/tree/master/packages/kadi">kadi</a> package.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span># Get three launcher scripts manage.py update_events and update_cmds
+/usr/bin/git clone ${TESTR_PACKAGES_REPO}/kadi
+
+# Copy some scripts to the current directory
+cd kadi
+cp manage.py update_events update_cmds ltt_bads.dat ../
+cd ..
+rm -rf kadi
+
+export KADI=$PWD
+./manage.py syncdb --noinput
+
+START=&#39;2015:001&#39;
+STOP=&#39;2015:030&#39;
+
+./update_events --start=$START --stop=$STOP
+./update_cmds --start=$START --stop=$STOP
+
+# Write event and commands data using test database
+./write_events_cmds.py --start=$START --stop=$START --data-root=events_cmds
+</pre></div>
+</div>
+<p>Another complicated example is in the
+<a class="reference external" href="https://github.com/sot/ska_testr/tree/master/packages/Ska.engarchive">Ska.engarchive</a>
+package.  This one is slightly different because it generates new database
+values and then immediately compares with the current production database.</p>
+</div>
+</div>
+<div class="section" id="summary-logs">
+<h3>Summary Logs<a class="headerlink" href="#summary-logs" title="Permalink to this headline">¶</a></h3>
+<p>Testr produces a summary log which includes all tests run. It parses the logs produced by pytest, and tests are grouped
+in suites following the test hierarchy. Tests that do not use pytest are grouped in a test suite at the top level.
+The log is written in JSON format and looks something like the following:</p>
+<div class="highlight-JSON notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="nt">&quot;test_suite&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Quaternion-tests&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;package&quot;</span><span class="p">:</span> <span class="s2">&quot;Quaternion&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;test_cases&quot;</span><span class="p">:</span> <span class="p">[</span>
+      <span class="p">{</span>
+        <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;post_check_logs.py&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;Quaternion/post_check_logs.py&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;timestamp&quot;</span><span class="p">:</span> <span class="s2">&quot;2020:06:16T09:43:13&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;log&quot;</span><span class="p">:</span> <span class="s2">&quot;Quaternion/post_check_logs.py.log&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;fail&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;failure&quot;</span><span class="p">:</span> <span class="p">{</span>
+          <span class="nt">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;post_check_logs.py failed&quot;</span><span class="p">,</span>
+          <span class="nt">&quot;output&quot;</span><span class="p">:</span> <span class="kc">null</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">],</span>
+    <span class="nt">&quot;timestamp&quot;</span><span class="p">:</span> <span class="s2">&quot;2020:06:16T09:43:13&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nt">&quot;system&quot;</span><span class="p">:</span> <span class="s2">&quot;Darwin&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;architecture&quot;</span><span class="p">:</span> <span class="s2">&quot;64bit&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;hostname&quot;</span><span class="p">:</span> <span class="s2">&quot;saos-MacBook-Pro.local&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;platform&quot;</span><span class="p">:</span> <span class="s2">&quot;Darwin-19.5.0&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;package&quot;</span><span class="p">:</span> <span class="s2">&quot;Quaternion&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;package_version&quot;</span><span class="p">:</span> <span class="s2">&quot;3.5.2.dev9+g7ee8b10.d20200616&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;t_start&quot;</span><span class="p">:</span> <span class="s2">&quot;2020:06:16T09:43:13&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;t_stop&quot;</span><span class="p">:</span> <span class="s2">&quot;2020:06:16T09:43:14&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;regress_dir&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+      <span class="nt">&quot;out_dir&quot;</span><span class="p">:</span> <span class="s2">&quot;Quaternion&quot;</span>
+    <span class="p">}</span>
+  <span class="p">},</span>
+  <span class="nt">&quot;test_suites&quot;</span><span class="p">:</span> <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="nt">&quot;test_cases&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;test_shape&quot;</span><span class="p">,</span>
+          <span class="nt">&quot;classname&quot;</span><span class="p">:</span> <span class="s2">&quot;Quaternion.tests.test_all&quot;</span><span class="p">,</span>
+          <span class="nt">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;Quaternion/tests/test_all.py&quot;</span><span class="p">,</span>
+          <span class="nt">&quot;line&quot;</span><span class="p">:</span> <span class="s2">&quot;43&quot;</span><span class="p">,</span>
+          <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;pass&quot;</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+          <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;test_init_exceptions&quot;</span><span class="p">,</span>
+          <span class="nt">&quot;classname&quot;</span><span class="p">:</span> <span class="s2">&quot;Quaternion.tests.test_all&quot;</span><span class="p">,</span>
+          <span class="nt">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;Quaternion/tests/test_all.py&quot;</span><span class="p">,</span>
+          <span class="nt">&quot;line&quot;</span><span class="p">:</span> <span class="s2">&quot;50&quot;</span><span class="p">,</span>
+          <span class="nt">&quot;failure&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Exception: Unexpected exception here&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;output&quot;</span><span class="p">:</span> <span class="s2">&quot;def test_init_exceptions():\n&gt;       raise Exception(&#39;Unexpected exception here&#39;)\nE       Exception: Unexpected exception here\n\nQuaternion/tests/test_all.py:52: Exception&quot;</span>
+          <span class="p">},</span>
+          <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;fail&quot;</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+          <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;test_from_q&quot;</span><span class="p">,</span>
+          <span class="nt">&quot;classname&quot;</span><span class="p">:</span> <span class="s2">&quot;Quaternion.tests.test_all&quot;</span><span class="p">,</span>
+          <span class="nt">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;Quaternion/tests/test_all.py&quot;</span><span class="p">,</span>
+          <span class="nt">&quot;line&quot;</span><span class="p">:</span> <span class="s2">&quot;83&quot;</span><span class="p">,</span>
+          <span class="nt">&quot;skipped&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;no way of currently testing this&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;output&quot;</span><span class="p">:</span> <span class="s2">&quot;Quaternion/tests/test_all.py:83: &lt;py._xmlgen.raw object at 0x7f9ca044fb38&gt;&quot;</span>
+          <span class="p">},</span>
+          <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;skipped&quot;</span>
+        <span class="p">}</span>
+      <span class="p">],</span>
+      <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Quaternion-pytest&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;system&quot;</span><span class="p">:</span> <span class="s2">&quot;Darwin&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;architecture&quot;</span><span class="p">:</span> <span class="s2">&quot;64bit&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;hostname&quot;</span><span class="p">:</span> <span class="s2">&quot;saos-MacBook-Pro.local&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;platform&quot;</span><span class="p">:</span> <span class="s2">&quot;Darwin-19.5.0&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;package&quot;</span><span class="p">:</span> <span class="s2">&quot;Quaternion&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;package_version&quot;</span><span class="p">:</span> <span class="s2">&quot;3.5.2.dev9+g7ee8b10.d20200616&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;t_start&quot;</span><span class="p">:</span> <span class="s2">&quot;2020:06:16T09:43:11&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;t_stop&quot;</span><span class="p">:</span> <span class="s2">&quot;2020:06:16T09:43:13&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;regress_dir&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+        <span class="nt">&quot;out_dir&quot;</span><span class="p">:</span> <span class="s2">&quot;Quaternion&quot;</span>
+      <span class="p">},</span>
+      <span class="nt">&quot;log&quot;</span><span class="p">:</span> <span class="s2">&quot;Quaternion/test_unit.py.log&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;hostname&quot;</span><span class="p">:</span> <span class="s2">&quot;saos-MacBook-Pro.local&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;timestamp&quot;</span><span class="p">:</span> <span class="s2">&quot;2020:06:16T09:43:11&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;package&quot;</span><span class="p">:</span> <span class="s2">&quot;Quaternion&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;Quaternion/test_unit.py&quot;</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="python-testing-helpers">
+<h2>Python testing helpers<a class="headerlink" href="#python-testing-helpers" title="Permalink to this headline">¶</a></h2>
+<p>The modules <code class="docutils literal notranslate"><span class="pre">testr.runner</span></code> and <code class="docutils literal notranslate"><span class="pre">testr.setup_helper</span></code> provide the infrastructure
+to enable easy and uniform running of pytest test functions in two ways:</p>
+<ul class="simple">
+<li><p>By importing the package (locally or installed) and doing <code class="docutils literal notranslate"><span class="pre">&lt;package&gt;.test(*args,</span> <span class="pre">**kwargs)</span></code></p></li>
+<li><p>Within a local development repo using <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">test</span> <span class="pre">--args='arg1</span> <span class="pre">kwarg2=val2'</span></code> where
+<code class="docutils literal notranslate"><span class="pre">arg1</span></code> and <code class="docutils literal notranslate"><span class="pre">kwarg2</span></code> are valid pytest arguments.</p></li>
+</ul>
+<div class="section" id="init-py">
+<h3><code class="docutils literal notranslate"><span class="pre">__init__.py</span></code><a class="headerlink" href="#init-py" title="Permalink to this headline">¶</a></h3>
+<p>Typical usage within the package <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Run py.test unit tests.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="kn">import</span> <span class="nn">testr</span>
+    <span class="k">return</span> <span class="n">testr</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This will run any tests that included as a <code class="docutils literal notranslate"><span class="pre">test</span></code> sub-package in the package
+distribution.  The following package layout shows an example of such inlined tests:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">setup</span><span class="o">.</span><span class="n">py</span>   <span class="c1"># your setuptools Python package metadata</span>
+<span class="n">mypkg</span><span class="o">/</span>
+    <span class="fm">__init__</span><span class="o">.</span><span class="n">py</span>
+    <span class="n">appmodule</span><span class="o">.</span><span class="n">py</span>
+    <span class="o">...</span>
+    <span class="n">tests</span><span class="o">/</span>
+        <span class="n">test_app</span><span class="o">.</span><span class="n">py</span>
+        <span class="o">...</span>
+</pre></div>
+</div>
+<p>A key advantage of providing inline tests is that they can be run post-install
+in the production environment, providing positive confirmation that the actual
+installed package is working as expected.  See the next section for an example
+<code class="docutils literal notranslate"><span class="pre">setup.py</span></code> file which shows including this inline test sub-package.</p>
+</div>
+<div class="section" id="setup-py">
+<h3><code class="docutils literal notranslate"><span class="pre">setup.py</span></code><a class="headerlink" href="#setup-py" title="Permalink to this headline">¶</a></h3>
+<p>Typical usage in <code class="docutils literal notranslate"><span class="pre">setup.py</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">setuptools</span> <span class="kn">import</span> <span class="n">setup</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">testr.setup_helper</span> <span class="kn">import</span> <span class="n">cmdclass</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">cmdclass</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="n">setup</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;my_package&#39;</span><span class="p">,</span>
+      <span class="n">packages</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;my_package&#39;</span><span class="p">,</span> <span class="s1">&#39;my_package.tests&#39;</span><span class="p">],</span>
+      <span class="n">tests_require</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;pytest&#39;</span><span class="p">],</span>
+      <span class="n">cmdclass</span><span class="o">=</span><span class="n">cmdclass</span><span class="p">,</span>
+      <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="api">
+<h2>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-testr.runner">
+<span id="testr-runner"></span><h3>testr.runner<a class="headerlink" href="#module-testr.runner" title="Permalink to this headline">¶</a></h3>
+<p>Provide a test() function that can be called from package __init__.</p>
+<dl class="py exception">
+<dt id="testr.runner.TestError">
+<em class="property">exception </em><code class="sig-prename descclassname">testr.runner.</code><code class="sig-name descname">TestError</code><a class="reference internal" href="_modules/testr/runner.html#TestError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#testr.runner.TestError" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="testr.runner.get_full_version">
+<code class="sig-prename descclassname">testr.runner.</code><code class="sig-name descname">get_full_version</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">calling_frame_globals</span></em>, <em class="sig-param"><span class="n">calling_frame_filename</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/testr/runner.html#get_full_version"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#testr.runner.get_full_version" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a full version which includes git info if the module was imported
+from the git repo source directory.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="testr.runner.test">
+<code class="sig-prename descclassname">testr.runner.</code><code class="sig-name descname">test</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/testr/runner.html#test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#testr.runner.test" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run py.test unit tests for the calling package with specified
+<code class="docutils literal notranslate"><span class="pre">args</span></code> and <code class="docutils literal notranslate"><span class="pre">kwargs</span></code>.</p>
+<p>This temporarily changes to the directory above the installed package
+directory and effectively runs <code class="docutils literal notranslate"><span class="pre">py.test</span> <span class="pre">&lt;packagename&gt;</span> <span class="pre">&lt;args&gt;</span> <span class="pre">&lt;kwargs&gt;</span></code>.</p>
+<p>If the kwarg <code class="docutils literal notranslate"><span class="pre">raise_exception=True</span></code> is provided then any test
+failures will result in an exception being raised.  This can be
+used to make a shell-level failure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – positional args to pass to pytest</p></li>
+<li><p><strong>raise_exception</strong> – test failures raise an exception (default=False)</p></li>
+<li><p><strong>package_from_dir</strong> – set package name from parent directory name (default=False)</p></li>
+<li><p><strong>verbose</strong> – run pytest in verbose (-v) mode (default=False)</p></li>
+<li><p><strong>show_output</strong> – run pytest in show output (-s) mode (default=False)</p></li>
+<li><p><strong>**kwargs</strong> – additional keyword args to pass to pytest</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>number of test failures</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="testr.runner.testr">
+<code class="sig-prename descclassname">testr.runner.</code><code class="sig-name descname">testr</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/testr/runner.html#testr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#testr.runner.testr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run py.test unit tests for the calling package.  This just calls the <code class="docutils literal notranslate"><span class="pre">test()</span></code>
+function but includes defaults that are more appropriate for integrated package
+testing using run_testr.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – positional args to pass to pytest</p></li>
+<li><p><strong>raise_exception</strong> – test failures raise an exception (default=True)</p></li>
+<li><p><strong>package_from_dir</strong> – set package name from parent directory name (default=True)</p></li>
+<li><p><strong>verbose</strong> – run pytest in verbose (-v) mode (default=True)</p></li>
+<li><p><strong>show_output</strong> – run pytest in show output (-s) mode (default=True)</p></li>
+<li><p><strong>**kwargs</strong> – additional keyword args to pass to pytest</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>number of test failures</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-testr.setup_helper">
+<span id="testr-setup-helper"></span><h3>testr.setup_helper<a class="headerlink" href="#module-testr.setup_helper" title="Permalink to this headline">¶</a></h3>
+<p>Define a test runner command class suitable for use in <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> so
+that <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">test</span></code> runs tests via pytest.</p>
+<dl class="py class">
+<dt id="testr.setup_helper.PyTest">
+<em class="property">class </em><code class="sig-prename descclassname">testr.setup_helper.</code><code class="sig-name descname">PyTest</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dist</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kw</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/testr/setup_helper.html#PyTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#testr.setup_helper.PyTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test runner command class suitable for use in <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> so
+that <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">test</span></code> runs tests via pytest.</p>
+<dl class="py method">
+<dt id="testr.setup_helper.PyTest.initialize_options">
+<code class="sig-name descname">initialize_options</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/testr/setup_helper.html#PyTest.initialize_options"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#testr.setup_helper.PyTest.initialize_options" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set default values for all the options that this command
+supports.  Note that these defaults may be overridden by other
+commands, by the setup script, by config files, or by the
+command-line.  Thus, this is not the place to code dependencies
+between options; generally, ‘initialize_options()’ implementations
+are just a bunch of “self.foo = None” assignments.</p>
+<p>This method must be implemented by all command classes.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-testr.test_helper">
+<span id="testr-test-helper"></span><h3>testr.test_helper<a class="headerlink" href="#module-testr.test_helper" title="Permalink to this headline">¶</a></h3>
+<p>Provide helper functions that are useful for unit testing.</p>
+<dl class="py function">
+<dt id="testr.test_helper.has_sybase">
+<code class="sig-prename descclassname">testr.test_helper.</code><code class="sig-name descname">has_sybase</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/testr/test_helper.html#has_sybase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#testr.test_helper.has_sybase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if the system apparently can run Sybase queries from Python.</p>
+<p>In detail, this is True if the SYBASE and SYBASE_OCS env variables are set
+and the correct Python shared object library exists on the system.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="testr.test_helper.on_head_network">
+<code class="sig-prename descclassname">testr.test_helper.</code><code class="sig-name descname">on_head_network</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/testr/test_helper.html#on_head_network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#testr.test_helper.on_head_network" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if the system is apparently on the HEAD network.</p>
+<p>This looks for subnets 52 (e.g. fido, lato) and 184 (kadi) on 131.142.xxx.</p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><h3>Page Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">testr</a><ul>
+<li><a class="reference internal" href="#package-testing-unit-regression-integration">Package testing: unit, regression, integration</a><ul>
+<li><a class="reference internal" href="#basic-structure">Basic structure</a><ul>
+<li><a class="reference internal" href="#get-version-id">get_version_id</a></li>
+<li><a class="reference internal" href="#packages">Packages</a></li>
+<li><a class="reference internal" href="#test-scripts">Test scripts</a></li>
+<li><a class="reference internal" href="#post-processing-scripts">Post-processing scripts</a></li>
+<li><a class="reference internal" href="#environment-variables">Environment variables</a></li>
+<li><a class="reference internal" href="#filename-conventions">Filename conventions</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#running-the-tests">Running the tests</a></li>
+<li><a class="reference internal" href="#selecting-tests">Selecting tests</a></li>
+<li><a class="reference internal" href="#comparing-regression-outputs">Comparing regression outputs</a></li>
+<li><a class="reference internal" href="#test-specification-files">Test specification files</a></li>
+<li><a class="reference internal" href="#file-recipes">File recipes</a><ul>
+<li><a class="reference internal" href="#test-unit-py">test_unit.py</a></li>
+<li><a class="reference internal" href="#test-unit-git-sh">test_unit_git.sh</a></li>
+<li><a class="reference internal" href="#post-regress-py">post_regress.py</a></li>
+<li><a class="reference internal" href="#post-check-logs-py">post_check_logs.py</a></li>
+<li><a class="reference internal" href="#test-regress-long-sh">test_regress_long.sh</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#summary-logs">Summary Logs</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#python-testing-helpers">Python testing helpers</a><ul>
+<li><a class="reference internal" href="#init-py"><code class="docutils literal notranslate"><span class="pre">__init__.py</span></code></a></li>
+<li><a class="reference internal" href="#setup-py"><code class="docutils literal notranslate"><span class="pre">setup.py</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#api">API</a><ul>
+<li><a class="reference internal" href="#module-testr.runner">testr.runner</a></li>
+<li><a class="reference internal" href="#module-testr.setup_helper">testr.setup_helper</a></li>
+<li><a class="reference internal" href="#module-testr.test_helper">testr.test_helper</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<form action="search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+<footer class="footer">
+  <p class="pull-right">
+    <a href="_sources/index.rst.txt"
+       rel="nofollow">Page Source</a> &nbsp;
+    <a href="#">Back to Top</a></p>
+  <p>
+    &copy; Copyright 2016, Tom Aldcroft.<br/>
+    Created using <a href="http://www.sphinx-doc.org/en/stable/">Sphinx</a> 3.1.2. &nbsp;
+  </p>
+</footer>
+  </body>
+</html>
