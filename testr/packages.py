@@ -187,7 +187,10 @@ def run_tests(package, tests):
             interpreter = test['interpreter']
 
             logger.info('Running {} {} script'.format(interpreter, test['file']))
-            logfile = Tee(test['file'] + '.log')
+            if test['file'].endswith('.sh'):
+                logfile = Tee(test['file'][-3:] + '_sh.log')
+            else:
+                logfile = Tee(test['file'] + '.log')
 
             # Set up the right command for bash.  In the case of a bash script the
             # cmd is the actual bash lines as a single string.  In this way each one
