@@ -18,6 +18,7 @@ import collections
 import json
 import datetime
 import platform
+from pathlib import Path
 
 opt = None
 logger = None
@@ -123,9 +124,9 @@ def collect_tests():
             version = ska_helpers.get_version(package)
         except:
             version = 'unknown'
-        in_dir = os.path.join(opt.packages_dir, package)
-        out_dir = os.path.abspath(os.path.join(opt.log_dir, package))
-        regress_dir = os.path.abspath(os.path.join(opt.regress_dir, package))
+        in_dir = opt.packages_dir / package
+        out_dir = (opt.log_dir / package).absolute()
+        regress_dir = (opt.regress_dir / package).absolute()
 
         with Ska.File.chdir(in_dir):
             test_files = sorted(glob('test_*')) + sorted(glob('post_*'))
@@ -157,7 +158,7 @@ def collect_tests():
 
 def run_tests(package, tests):
     # Collect test scripts in package and find the ones that are included
-    in_dir = os.path.join(opt.packages_dir, package)
+    in_dir = opt.packages_dir / package
 
     include_tests = [test for test in tests if test['status'] != '----']
     skipping = '' if include_tests else ': skipping - no included tests'
@@ -169,13 +170,13 @@ def run_tests(package, tests):
         return []
 
     # Copy all files for package tests.
-    out_dir = os.path.join(opt.log_dir, package)
-    if not opt.overwrite and os.path.exists(out_dir):
+    out_dir = opt.log_dir / package
+    if not opt.overwrite and out_dir.exists():
         logger.info('Removing existing output dir {}'.format(out_dir))
         shutil.rmtree(out_dir)
 
     logger.info('Copying input tests {} to output dir {}'.format(in_dir, out_dir))
-    Spawn().run(['rsync', '-a', in_dir + '/', out_dir, '--exclude=*~'])
+    Spawn().run(['rsync', '-a', f'{in_dir}/', str(out_dir), '--exclude=*~'])
 
     # Now run the tests and collect test status
     with Ska.File.chdir(out_dir):
@@ -187,7 +188,7 @@ def run_tests(package, tests):
             interpreter = test['interpreter']
 
             logger.info('Running {} {} script'.format(interpreter, test['file']))
-            logfile = Tee(test['file'] + '.log')
+            logfile = Tee(Path(test['file']).with_suffix('.log'))
 
             # Set up the right command for bash.  In the case of a bash script the
             # cmd is the actual bash lines as a single string.  In this way each one
@@ -328,7 +329,7 @@ def _rel_path_if_descendant(path, root):
     # previous components are thrown away and joining continues from the absolute path component.
     # In other words: if p is absolute, real_root is ignored.
     if os.path.exists(os.path.join(real_root, p)):
-        return p
+        return str(p)
 
 
 def write_log(tests, include_stdout=False):
@@ -354,20 +355,20 @@ def write_log(tests, include_stdout=False):
                 test_props[k] = _rel_path_if_descendant(test[k], outputs_subdir)
 
             stdout = None
-            test_file = _rel_path_if_descendant(os.path.join(test['out_dir'], test['file']),
-                                               outputs_subdir)
-            log_file = _rel_path_if_descendant(os.path.join(test['out_dir'], f"{test['file']}.log"),
+            test_file = _rel_path_if_descendant(test['out_dir'] / test['file'],
+                                                outputs_subdir)
+            log_file = _rel_path_if_descendant((test['out_dir'] / test['file']).with_suffix('.log'),
                                                outputs_subdir)
             if include_stdout and log_file:
                 with open(log_file) as f:
                     stdout = f.read()
 
-            xml_file = _rel_path_if_descendant(os.path.join(test['out_dir'], f'{test["file"]}.xml'),
+            xml_file = _rel_path_if_descendant((test['out_dir'] / test['file']).with_suffix('.xml'),
                                                outputs_subdir)
-            if xml_file and os.path.exists(os.path.join(outputs_subdir, xml_file)):
+            if xml_file and (outputs_subdir / xml_file).exists():
                 properties = sys_info.copy()
                 properties.update(test_props)
-                test_suites = _parse_xml(os.path.join(outputs_subdir, xml_file))
+                test_suites = _parse_xml(outputs_subdir / xml_file)
                 for ts in test_suites:
                     ts['properties'] = properties
                     ts.update({
@@ -396,9 +397,9 @@ def write_log(tests, include_stdout=False):
                 test_status = {'pass': 'pass', 'fail': 'fail', '----': 'skipped'}
                 test_case = dict(
                     name=test['file'],
-                    file=test_file,
+                    file=str(test_file),
                     timestamp=test_props['t_start'],
-                    log=log_file,
+                    log=str(log_file),
                     status=test_status[test['status'].lower()]
                 )
                 if stdout:
@@ -431,7 +432,7 @@ def write_log(tests, include_stdout=False):
             'date': datetime.datetime.now().strftime('%Y:%m:%dT%H:%M:%S'),
             'argv': sys.argv,
             'ska_version': ska_version,
-            'test_spec': os.path.basename(str(opt.test_spec))
+            'test_spec': opt.test_spec.name if opt.test_spec else 'None'
         }
     }
     if all_test_suites:
@@ -446,14 +447,14 @@ def write_log(tests, include_stdout=False):
             for k in ['architecture', 'hostname', 'system', 'platform']
         })
         test_suites['test_suites'] = all_test_suites
-    outfile = os.path.join(outputs_subdir, f'all_tests.json')
+    outfile = outputs_subdir / 'all_tests.json'
     with open(outfile, 'w') as f:
         json.dump(test_suites, f, indent=2)
 
 
 def make_test_dir():
     test_dir = opt.log_dir
-    if os.path.exists(test_dir):
+    if test_dir.exists():
         print('WARNING: reusing existing output directory {}\n'.format(test_dir))
         # TODO: maybe make this a raw_input confirmation in production.  Note:
         # logger doesn't exist yet since it logs into test_dir.
@@ -461,10 +462,10 @@ def make_test_dir():
         os.makedirs(test_dir)
 
     # Make a symlink 'last' to the most recent directory
-    with Ska.File.chdir(os.path.dirname(opt.log_dir)):
+    with Ska.File.chdir(opt.log_dir.parent):
         if os.path.lexists('last'):
             os.unlink('last')
-        os.symlink(os.path.basename(opt.log_dir), 'last')
+        os.symlink(opt.log_dir.name, 'last')
 
     return test_dir
 
@@ -494,12 +495,16 @@ def make_regress_files(regress_files, out_dir=None, regress_dir=None, clean=None
     if regress_dir is None:
         regress_dir = os.environ.get('TESTR_REGRESS_DIR')
 
+    # make sure these are paths
+    regress_dir = Path(regress_dir)
+    out_dir = Path(out_dir)
+
     # Make the top-level directory where files go
-    if not os.path.exists(regress_dir):
+    if not regress_dir.exists():
         os.makedirs(regress_dir)
 
     for regress_file in regress_files:
-        with open(os.path.join(out_dir, regress_file), 'r') as fh:
+        with open(out_dir / regress_file, 'r') as fh:
             lines = fh.readlines()
 
         if regress_file in clean:
@@ -508,9 +513,9 @@ def make_regress_files(regress_files, out_dir=None, regress_dir=None, clean=None
 
         # Might need to make output directory since regress_file can
         # contain directory prefix.
-        regress_path = os.path.join(regress_dir, regress_file)
-        regress_path_dir = os.path.dirname(regress_path)
-        if not os.path.exists(regress_path_dir):
+        regress_path = regress_dir / regress_file
+        regress_path_dir = regress_path.parent
+        if not regress_path_dir.exists():
             os.makedirs(regress_path_dir)
 
         with open(regress_path, 'w') as fh:
@@ -544,7 +549,7 @@ def check_files(filename, checks, allows=None, out_dir=None):
 
     matches = []
     for filename in glob(filename):
-        with open(os.path.join(out_dir, filename), 'r') as fh:
+        with open(Path(out_dir) / filename, 'r') as fh:
             lines = fh.readlines()
 
         for check in checks:
@@ -564,30 +569,28 @@ def process_opt():
     convenience.
     """
     # Set up directories
-    opt.root = os.path.abspath(opt.root)
-    opt.packages_dir = os.path.join(opt.root, 'packages')
-    get_version_id = os.path.join(opt.root, 'get_version_id')
-    if not os.path.exists(get_version_id):
+    opt.root = Path(opt.root).absolute()
+    opt.outputs_dir = Path(opt.outputs_dir)
+    opt.packages_dir = opt.root / 'packages'
+    get_version_id = opt.root / 'get_version_id'
+    if not get_version_id.exists():
         get_logger().error(f'No get_version_id script in root directory: {opt.root}')
         sys.exit(1)
-    outputs_subdir = bash(get_version_id)[0]
-    opt.log_dir = os.path.abspath(os.path.join(opt.outputs_dir,
-                                               'logs',
-                                               outputs_subdir))
-    opt.regress_dir = os.path.abspath(os.path.join(opt.outputs_dir,
-                                                   'regress',
-                                                   outputs_subdir))
+    outputs_subdir = bash(str(get_version_id))[0]
+    opt.log_dir = (opt.outputs_dir / 'logs' / outputs_subdir).absolute()
+    opt.regress_dir = (opt.outputs_dir / 'regress' /  outputs_subdir).absolute()
 
     if opt.test_spec:
-        if not os.path.exists(opt.test_spec):
-            if os.path.exists(os.path.join(opt.root, opt.test_spec)):
-                opt.test_spec = os.path.join(opt.root, opt.test_spec)
+        opt.test_spec = Path(opt.test_spec)
+        if not opt.test_spec.exists():
+            if (opt.root / opt.test_spec).exists():
+                opt.test_spec = opt.root / opt.test_spec
             else:
                 get_logger().error(f'test_spec file {opt.test_spec} does not exist')
                 sys.exit(1)
         # This puts regression outputs into a separate sub-directory
         # and reads additional test file include/excludes.
-        opt.regress_dir = os.path.join(opt.regress_dir, os.path.basename(opt.test_spec))
+        opt.regress_dir = opt.regress_dir / opt.test_spec.name
 
         with open('{}'.format(opt.test_spec), 'r') as fh:
             specs = (line.strip() for line in fh)
@@ -614,7 +617,7 @@ def main():
 
     # TODO: back-version existing test.log file to test.log.N where N is the first
     # available number.
-    logger = get_logger(name='run_tests', filename=os.path.join(test_dir, 'test.log'))
+    logger = get_logger(name='run_tests', filename=(test_dir / 'test.log'))
 
     tests = collect_tests()  # dict of (list of tests) keyed by package
 
