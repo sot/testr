@@ -8,20 +8,23 @@ import sys
 import os
 import shutil
 import subprocess
-
-import Ska.File
-from Ska.Shell import bash, ShellError, Spawn
-from pyyaks.logger import get_logger
-from astropy.table import Table
+from pathlib import Path
 from xml.dom import minidom
 import collections
 import json
 import datetime
 import platform
-from pathlib import Path
+
+import Ska.File
+from Ska.Shell import bash, ShellError
+from pyyaks.logger import get_logger
+from astropy.table import Table
+from cxotime import CxoTime
 
 opt = None
 logger = None
+
+IS_WINDOWS = platform.system() == 'Windows'
 
 
 def get_options():
@@ -65,10 +68,6 @@ def get_options():
                         default='https://github.com/sot',
                         help=("Base URL for package git repos"),
                         )
-    parser.add_argument("--overwrite",
-                        action="store_true",
-                        help=('Overwrite existing outputs directory instead of deleting'),
-                        )
     parser.set_defaults()
 
     return parser.parse_args()
@@ -88,6 +87,9 @@ class Tee(object):
     def flush(self):
         self.fh.flush()
         sys.stdout.flush()
+
+    def fileno(self):
+        return sys.stdout.fileno()
 
 
 def box_output(lines, min_width=40):
@@ -122,7 +124,7 @@ def collect_tests():
         try:
             import ska_helpers
             version = ska_helpers.get_version(package)
-        except:
+        except Exception:
             version = 'unknown'
         in_dir = opt.packages_dir / package
         out_dir = (opt.log_dir / package).absolute()
@@ -171,21 +173,26 @@ def run_tests(package, tests):
 
     # Copy all files for package tests.
     out_dir = opt.log_dir / package
-    if not opt.overwrite and out_dir.exists():
+    if out_dir.exists():
         logger.info('Removing existing output dir {}'.format(out_dir))
         shutil.rmtree(out_dir)
 
-    logger.info('Copying input tests {} to output dir {}'.format(in_dir, out_dir))
-    Spawn().run(['rsync', '-a', f'{in_dir}/', str(out_dir), '--exclude=*~'])
+    logger.info(f'Copying input tests {in_dir} to output dir {out_dir}')
+    shutil.copytree(in_dir, out_dir)
 
     # Now run the tests and collect test status
     with Ska.File.chdir(out_dir):
         for test in include_tests:
             # Make the test keys available in the environment
-            env = {'TESTR_{}'.format(str(key).upper()): val
-                   for key, val in test.items()}
+            env = os.environ.copy()
+            env.update({'TESTR_{}'.format(str(key).upper()): str(val)
+                        for key, val in test.items()})
 
             interpreter = test['interpreter']
+
+            if interpreter == 'bash' and IS_WINDOWS:
+                logger.info(f'Skipping bash {test["file"]} on Windows')
+                continue
 
             logger.info('Running {} {} script'.format(interpreter, test['file']))
             logfile = Tee(Path(test['file']).with_suffix('.log'))
@@ -194,21 +201,33 @@ def run_tests(package, tests):
             # cmd is the actual bash lines as a single string.  In this way each one
             # gets echoed and run so that an intermediate failure is caught.  For
             # no interpreter assume the file is executable.
-            if interpreter == 'bash':
-                with open(test['file'], 'r') as fh:
-                    cmd = fh.read()
-            elif interpreter is None:
-                cmd = './' + test['file']
-            else:
-                cmd = interpreter + ' ' + test['file']
             test['t_start'] = datetime.datetime.now().strftime('%Y:%m:%dT%H:%M:%S')
-            try:
-                bash(cmd, logfile=logfile, env=env)
-            except ShellError:
-                # Test process returned a non-zero status => Fail
-                test['status'] = 'FAIL'
+
+            if IS_WINDOWS:
+                cmds = [sys.executable, test['file']]
+                try:
+                    sub = subprocess.run(cmds, env=env, stdout=logfile)
+                except Exception:
+                    test['status'] = 'FAIL'
+                else:
+                    test['status'] = 'pass' if sub.returncode == 0 else 'FAIL'
             else:
-                test['status'] = 'pass'
+                if interpreter == 'bash':
+                    with open(test['file'], 'r') as fh:
+                        cmd = fh.read()
+                elif interpreter is None:
+                    cmd = './' + test['file']
+                else:
+                    cmd = interpreter + ' ' + test['file']
+
+                try:
+                    bash(cmd, logfile=logfile, env=env)
+                except ShellError:
+                    # Test process returned a non-zero status => Fail
+                    test['status'] = 'FAIL'
+                else:
+                    test['status'] = 'pass'
+
             test['t_stop'] = datetime.datetime.now().strftime('%Y:%m:%dT%H:%M:%S')
 
     box_output(['{} Test Summary'.format(package)] +
@@ -563,6 +582,19 @@ def check_files(filename, checks, allows=None, out_dir=None):
         raise ValueError('Found matches in check_files:\n{}'.format('\n'.join(matches)))
 
 
+def get_version_id():
+    import socket
+    hostname = socket.gethostname()
+    cmds = ['python', Path(sys.prefix, 'bin', 'ska_version')]
+    version = subprocess.check_output(cmds).decode('ascii').strip()
+    time = CxoTime.now()
+    time.format = 'isot'
+    time.precision = 0
+    version_id = f'{hostname}_{time}_{hostname}_{platform.system()}_{version}'
+    version_id = version_id.replace(':', '-')  # Windows does not like colon in file name
+    return version_id
+
+
 def process_opt():
     """
     Process options and make various inplace replacements for downstream
@@ -572,13 +604,9 @@ def process_opt():
     opt.root = Path(opt.root).absolute()
     opt.outputs_dir = Path(opt.outputs_dir)
     opt.packages_dir = opt.root / 'packages'
-    get_version_id = opt.root / 'get_version_id'
-    if not get_version_id.exists():
-        get_logger().error(f'No get_version_id script in root directory: {opt.root}')
-        sys.exit(1)
-    outputs_subdir = bash(str(get_version_id))[0]
+    outputs_subdir = get_version_id()
     opt.log_dir = (opt.outputs_dir / 'logs' / outputs_subdir).absolute()
-    opt.regress_dir = (opt.outputs_dir / 'regress' /  outputs_subdir).absolute()
+    opt.regress_dir = (opt.outputs_dir / 'regress' / outputs_subdir).absolute()
 
     if opt.test_spec:
         opt.test_spec = Path(opt.test_spec)
