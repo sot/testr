@@ -191,6 +191,7 @@ def run_tests(package, tests):
 
             if interpreter == 'bash' and IS_WINDOWS:
                 logger.info(f'Skipping bash {test["file"]} on Windows')
+                test['status'] = '----'
                 continue
 
             logger.info('Running {} {} script'.format(interpreter, test['file']))
@@ -208,7 +209,9 @@ def run_tests(package, tests):
 
                 cmds = [sys.executable, test['file']]
                 try:
-                    sub = subprocess.run(cmds, env=env, stdout=logfile)
+                    sub = subprocess.run(cmds, env=env, capture_output=True)
+                    logfile.write(sub.stdout.decode('ascii')
+                                  + sub.stderr.decode('ascii'))
                 except Exception:
                     test['status'] = 'FAIL'
                 else:
@@ -585,15 +588,15 @@ def check_files(filename, checks, allows=None, out_dir=None):
 
 
 def get_version_id():
-    import socket
-    hostname = socket.gethostname()
+    hostname = platform.uname().node
     cmds = ['python', Path(sys.prefix, 'bin', 'ska_version')]
     version = subprocess.check_output(cmds).decode('ascii').strip()
     time = CxoTime.now()
     time.format = 'isot'
     time.precision = 0
-    version_id = f'{hostname}_{time}_{hostname}_{platform.system()}_{version}'
-    version_id = version_id.replace(':', '-')  # Windows does not like colon in file name
+    version_id = f'{platform.system()}_{time}_{version}_{hostname}'
+    # Colon in file name is bad for Windows and also fails cheta long regress test
+    version_id = version_id.replace(':', '-')
     return version_id
 
 
