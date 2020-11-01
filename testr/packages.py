@@ -184,9 +184,8 @@ def run_tests(package, tests):
     with Ska.File.chdir(out_dir):
         for test in include_tests:
             # Make the test keys available in the environment
-            env = os.environ.copy()
-            env.update({'TESTR_{}'.format(str(key).upper()): str(val)
-                        for key, val in test.items()})
+            env = {'TESTR_{}'.format(str(key).upper()): str(val)
+                   for key, val in test.items()}
 
             interpreter = test['interpreter']
 
@@ -204,6 +203,9 @@ def run_tests(package, tests):
             test['t_start'] = datetime.datetime.now().strftime('%Y:%m:%dT%H:%M:%S')
 
             if IS_WINDOWS:
+                # Need full environment in the subprocess run
+                env.update(os.environ)
+
                 cmds = [sys.executable, test['file']]
                 try:
                     sub = subprocess.run(cmds, env=env, stdout=logfile)
