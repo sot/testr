@@ -251,7 +251,7 @@ def get_results_table(tests):
 
 
 def _parse_xml_testsuite(node):
-    attributes = collections.defaultdict(lambda : None)
+    attributes = collections.defaultdict(lambda: None)
     attributes.update({k: node.getAttribute(k) for k in node.attributes.keys()})
 
     for k in ['system-err', 'system-out']:
@@ -270,7 +270,7 @@ def _parse_xml_testsuite(node):
         timestamp=attributes['timestamp'],
         stdout=attributes['system-out'],
         stderr=attributes['system-err'],
-        #properties =
+        # properties =
         file=attributes['file'],
         log=None,
         url=None,
@@ -280,9 +280,10 @@ def _parse_xml_testsuite(node):
         test_suite['test_cases'].append(_parse_xml_testcase(child))
     return test_suite
 
+
 def _parse_xml_testcase(node):
-    attributes = collections.defaultdict(lambda : None)
-    attributes.update({k:node.getAttribute(k) for k in node.attributes.keys()})
+    attributes = collections.defaultdict(lambda: None)
+    attributes.update({k: node.getAttribute(k) for k in node.attributes.keys()})
 
     for k in ['system-err', 'system-out']:
         if node.getElementsByTagName('system-err'):
