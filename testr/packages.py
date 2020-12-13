@@ -241,7 +241,7 @@ def run_tests(package, tests):
         for test in include_tests:
             if skip_reason := check_skip_test(test, skip_tests):
                 logger.info(f'Skipping {test["file"]}: {skip_reason}')
-                test['status'] = 'skip'
+                test['status'] = '----'
                 continue
 
             # Make the test keys available in the environment
@@ -475,8 +475,7 @@ def write_log(tests, include_stdout=False):
                         timestamp=test_props['t_start'],
                         properties=properties
                     )
-                test_status = {'pass': 'pass', 'fail': 'fail',
-                               '----': 'skipped', 'skip': 'skipped'}
+                test_status = {'pass': 'pass', 'fail': 'fail', '----': 'skipped'}
                 test_case = dict(
                     name=test['file'],
                     file=str(test_file),
@@ -491,7 +490,7 @@ def write_log(tests, include_stdout=False):
                         'message': f'{test["file"]} failed',
                         'output': None
                     }
-                elif test['status'].lower() in ('----', 'skip'):
+                elif test['status'].lower() == '----':
                     test_case['skipped'] = {
                         'message': f'{test["file"]} skipped',
                         'output': None
