@@ -14,6 +14,8 @@ import collections
 import json
 import datetime
 import platform
+import yaml
+
 
 import Ska.File
 from Ska.Shell import bash, ShellError
@@ -21,10 +23,11 @@ from pyyaks.logger import get_logger
 from astropy.table import Table
 from cxotime import CxoTime
 
+from . import test_helper
+from . import __version__
+
 opt = None
 logger = None
-
-IS_WINDOWS = platform.system() == 'Windows'
 
 
 def get_options():
@@ -68,6 +71,7 @@ def get_options():
                         default='https://github.com/sot',
                         help=("Base URL for package git repos"),
                         )
+    parser.add_argument('--version', action='version', version=__version__)
     parser.set_defaults()
 
     return parser.parse_args()
@@ -158,6 +162,56 @@ def collect_tests():
     return tests
 
 
+def get_skip_tests():
+    """Read skip.yml file that specifies tests in this directory to skip.
+
+    The file should be in the form::
+
+        fileglob1:
+          check_func: test_helper_function_name
+          check_args: ['arg1', 'arg2']  # optional args
+          reason: Reason for skipping  # optional reason
+        fileglob2:
+          check_func: NOT test_helper_function_name  # Negate with "not" or "NOT"
+          reason: Reason for skipping
+
+    The ``test_helper_function_name`` is the name of a function in the
+    ``test_helper`` module to run. E.g. ``check: is_windows`` will run
+    ``test_helper.is_windows()``.
+    """
+    skip_file = Path('skip.yml')
+    skip_tests = yaml.safe_load(open(skip_file)) if skip_file.exists() else {}
+
+    return skip_tests
+
+
+def check_skip_test(test, skip_tests):
+    """Check if the current ``test`` should be skipped.
+
+    Returns string reason if test should be skipped, otherwise None.
+    """
+    for file_glob, spec in skip_tests.items():
+        if fnmatch(test['file'], file_glob):
+            check_func = spec['check_func'].split()[-1]
+            try:
+                check_func = getattr(test_helper, check_func)
+            except AttributeError:
+                raise ValueError(f'{check_func} must be a function in testr.test_helper')
+
+            negate = re.match(r'not\s', spec['check_func'], re.IGNORECASE)
+            check_args = spec.get('check_args', [])
+            skip_check = check_func(*check_args)
+            if negate:
+                skip_check = not skip_check
+            if skip_check:
+                arg_str = ', '.join(repr(arg) for arg in check_args)
+                reason = spec['check_func'] + f'({arg_str})'
+                return spec.get('reason', reason)
+
+    # No checks matched
+    return None
+
+
 def run_tests(package, tests):
     # Collect test scripts in package and find the ones that are included
     in_dir = opt.packages_dir / package
@@ -182,17 +236,19 @@ def run_tests(package, tests):
 
     # Now run the tests and collect test status
     with Ska.File.chdir(out_dir):
+        skip_tests = get_skip_tests()
+
         for test in include_tests:
+            if skip_reason := check_skip_test(test, skip_tests):
+                logger.info(f'Skipping {test["file"]}: {skip_reason}')
+                test['status'] = 'skip'
+                continue
+
             # Make the test keys available in the environment
             env = {'TESTR_{}'.format(str(key).upper()): str(val)
                    for key, val in test.items()}
 
             interpreter = test['interpreter']
-
-            if interpreter == 'bash' and IS_WINDOWS:
-                logger.info(f'Skipping bash {test["file"]} on Windows')
-                test['status'] = '----'
-                continue
 
             logger.info('Running {} {} script'.format(interpreter, test['file']))
             logfile = Tee(Path(test['file']).with_suffix('.log'))
@@ -203,7 +259,7 @@ def run_tests(package, tests):
             # no interpreter assume the file is executable.
             test['t_start'] = datetime.datetime.now().strftime('%Y:%m:%dT%H:%M:%S')
 
-            if IS_WINDOWS:
+            if test_helper.is_windows():
                 # Need full environment in the subprocess run
                 env.update(os.environ)
 
@@ -419,7 +475,8 @@ def write_log(tests, include_stdout=False):
                         timestamp=test_props['t_start'],
                         properties=properties
                     )
-                test_status = {'pass': 'pass', 'fail': 'fail', '----': 'skipped'}
+                test_status = {'pass': 'pass', 'fail': 'fail',
+                               '----': 'skipped', 'skip': 'skipped'}
                 test_case = dict(
                     name=test['file'],
                     file=str(test_file),
@@ -434,7 +491,7 @@ def write_log(tests, include_stdout=False):
                         'message': f'{test["file"]} failed',
                         'output': None
                     }
-                elif test['status'].lower() == '----':
+                elif test['status'].lower() in ('----', 'skip'):
                     test_case['skipped'] = {
                         'message': f'{test["file"]} skipped',
                         'output': None
@@ -461,12 +518,12 @@ def write_log(tests, include_stdout=False):
         }
     }
     if all_test_suites:
-        test_suites['run_info']['t_stop'] = min([ts['properties']['t_stop']
-                                                 for ts in all_test_suites if
-                                                 ts['properties']['t_start'] is not None])
-        test_suites['run_info']['t_start'] = min([ts['properties']['t_start']
-                                                  for ts in all_test_suites if
-                                                  ts['properties']['t_start'] is not None])
+        t_stops = [ts['properties']['t_stop'] for ts in all_test_suites
+                   if ts['properties']['t_start'] is not None]
+        t_starts = [ts['properties']['t_start'] for ts in all_test_suites
+                    if ts['properties']['t_start'] is not None]
+        test_suites['run_info']['t_stop'] = min(t_stops) if t_stops else None
+        test_suites['run_info']['t_start'] = min(t_starts) if t_starts else None
         test_suites['run_info'].update({
             k: sorted(set([ts['properties'][k] for ts in all_test_suites]))
             for k in ['architecture', 'hostname', 'system', 'platform']

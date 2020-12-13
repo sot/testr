@@ -7,8 +7,50 @@ import sys
 import os
 from pathlib import Path
 import socket
+import platform
 
-__all__ = ['has_sybase', 'on_head_network', 'is_32_bit']
+__all__ = ['has_paths', 'has_dirs', 'has_sybase', 'on_head_network', 'is_32_bit',
+           'is_windows', 'is_mac', 'is_linux']
+
+
+def has_paths(*paths):
+    """All of the ``paths`` exist
+
+    Input path(s) can contain ~ (home dir) or environment variables like $SKA or
+    ${SKA}.
+    """
+    for path in paths:
+        path = os.path.expanduser(os.path.expandvars(path))
+        path = Path(path)
+        if not path.exists():
+            return False
+    return True
+
+
+def has_dirs(*paths):
+    """All of the ``paths`` exist and each is a directory
+
+    Input path(s) can contain ~ (home dir) or environment variables like $SKA or
+    ${SKA}.
+    """
+    for path in paths:
+        path = os.path.expanduser(os.path.expandvars(path))
+        path = Path(path)
+        if not (path.exists() and path.is_dir()):
+            return False
+    return True
+
+
+def is_windows():
+    return platform.system() == 'Windows'
+
+
+def is_mac():
+    return platform.system() == 'Darwin'
+
+
+def is_linux():
+    return platform.system() == 'Linux'
 
 
 def has_sybase():
