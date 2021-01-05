@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>testr.test_helper &#8212; testr 4.5.0 documentation</title>
+    <title>testr.test_helper &#8212; testr 4.6.0 documentation</title>
     <link rel="stylesheet" href="../../_static/bootstrap-astropy.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     
@@ -47,7 +47,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="../../index.html">testr 4.5.0 documentation</a>
+	<a href="../../index.html">testr 4.6.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
@@ -72,8 +72,50 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">import</span> <span class="nn">socket</span>
+<span class="kn">import</span> <span class="nn">platform</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;has_sybase&#39;</span><span class="p">,</span> <span class="s1">&#39;on_head_network&#39;</span><span class="p">,</span> <span class="s1">&#39;is_32_bit&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;has_paths&#39;</span><span class="p">,</span> <span class="s1">&#39;has_dirs&#39;</span><span class="p">,</span> <span class="s1">&#39;has_sybase&#39;</span><span class="p">,</span> <span class="s1">&#39;on_head_network&#39;</span><span class="p">,</span> <span class="s1">&#39;is_32_bit&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;is_windows&#39;</span><span class="p">,</span> <span class="s1">&#39;is_mac&#39;</span><span class="p">,</span> <span class="s1">&#39;is_linux&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="has_paths"><a class="viewcode-back" href="../../index.html#testr.test_helper.has_paths">[docs]</a><span class="k">def</span> <span class="nf">has_paths</span><span class="p">(</span><span class="o">*</span><span class="n">paths</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;All of the ``paths`` exist</span>
+
+<span class="sd">    Input path(s) can contain ~ (home dir) or environment variables like $SKA or</span>
+<span class="sd">    ${SKA}.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expandvars</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="has_dirs"><a class="viewcode-back" href="../../index.html#testr.test_helper.has_dirs">[docs]</a><span class="k">def</span> <span class="nf">has_dirs</span><span class="p">(</span><span class="o">*</span><span class="n">paths</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;All of the ``paths`` exist and each is a directory</span>
+
+<span class="sd">    Input path(s) can contain ~ (home dir) or environment variables like $SKA or</span>
+<span class="sd">    ${SKA}.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expandvars</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<span class="k">def</span> <span class="nf">is_windows</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;Windows&#39;</span>
+
+
+<span class="k">def</span> <span class="nf">is_mac</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;Darwin&#39;</span>
+
+
+<span class="k">def</span> <span class="nf">is_linux</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;Linux&#39;</span>
 
 
 <div class="viewcode-block" id="has_sybase"><a class="viewcode-back" href="../../index.html#testr.test_helper.has_sybase">[docs]</a><span class="k">def</span> <span class="nf">has_sybase</span><span class="p">():</span>

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>testr &#8212; testr 4.5.0 documentation</title>
+    <title>testr &#8212; testr 4.6.0 documentation</title>
     <link rel="stylesheet" href="_static/bootstrap-astropy.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
@@ -47,7 +47,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="#">testr 4.5.0 documentation</a>
+	<a href="#">testr 4.6.0 documentation</a>
 	 &#187;
       </li>
       
@@ -740,6 +740,22 @@ are just a bunch of “self.foo = None” assignments.</p>
 <div class="section" id="module-testr.test_helper">
 <span id="testr-test-helper"></span><h3>testr.test_helper<a class="headerlink" href="#module-testr.test_helper" title="Permalink to this headline">¶</a></h3>
 <p>Provide helper functions that are useful for unit testing.</p>
+<dl class="py function">
+<dt id="testr.test_helper.has_dirs">
+<code class="sig-prename descclassname">testr.test_helper.</code><code class="sig-name descname">has_dirs</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">paths</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/testr/test_helper.html#has_dirs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#testr.test_helper.has_dirs" title="Permalink to this definition">¶</a></dt>
+<dd><p>All of the <code class="docutils literal notranslate"><span class="pre">paths</span></code> exist and each is a directory</p>
+<p>Input path(s) can contain ~ (home dir) or environment variables like $SKA or
+${SKA}.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="testr.test_helper.has_paths">
+<code class="sig-prename descclassname">testr.test_helper.</code><code class="sig-name descname">has_paths</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">paths</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/testr/test_helper.html#has_paths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#testr.test_helper.has_paths" title="Permalink to this definition">¶</a></dt>
+<dd><p>All of the <code class="docutils literal notranslate"><span class="pre">paths</span></code> exist</p>
+<p>Input path(s) can contain ~ (home dir) or environment variables like $SKA or
+${SKA}.</p>
+</dd></dl>
+
 <dl class="py function">
 <dt id="testr.test_helper.has_sybase">
 <code class="sig-prename descclassname">testr.test_helper.</code><code class="sig-name descname">has_sybase</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/testr/test_helper.html#has_sybase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#testr.test_helper.has_sybase" title="Permalink to this definition">¶</a></dt>
