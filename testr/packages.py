@@ -282,6 +282,13 @@ def run_tests(package, tests):
                     cmd = interpreter + ' ' + test['file']
 
                 try:
+                    env.update(
+                        {
+                            k: os.environ[k]
+                            for k in ['HISTSIZE', 'HISTFILESIZE', 'HISTIGNORE', 'HISTCONTROL']
+                            if k in os.environ
+                        }
+                    )
                     bash(cmd, logfile=logfile, env=env)
                 except ShellError:
                     # Test process returned a non-zero status => Fail
