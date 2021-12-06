@@ -21,7 +21,11 @@ PYTEST_IGNORE_WARNINGS = (
     '-Wignore:parse functions are required to provide a named:PendingDeprecationWarning',
 
     # Shows up in sparkles from importing bleach
-    '-Wignore:Using or importing the ABCs:DeprecationWarning')
+    '-Wignore:Using or importing the ABCs:DeprecationWarning',
+
+    # Shows up in several places from importing PyTables
+    '-Wignore:`np.object` is a deprecated alias for the builtin `object`',
+    )
 
 
 class TestError(Exception):
