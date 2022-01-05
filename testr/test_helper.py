@@ -95,3 +95,30 @@ def on_head_network():
 
 def is_32_bit():
     return sys.maxsize <= 2 ** 32
+
+
+def has_internet(host="8.8.8.8", port=53, timeout=3):
+    """Return True if internet is available by trying to reach ``host``.
+
+    Adapted from https://stackoverflow.com/questions/3764291
+    
+    Parameters
+    ----------
+    host : str
+        Host IP to reach (default=8.8.8.8 (google-public-dns-a.google.com))
+    port : int
+        Port to use (default=53)
+    timeout : int, float
+        Timeout in seconds (default=3)
+
+    Returns
+    -------
+    has_internet : bool
+    """
+    import socket
+    try:
+        socket.setdefaulttimeout(timeout)
+        socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
+        return True
+    except socket.error:
+        return False
