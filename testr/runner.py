@@ -34,7 +34,10 @@ PYTEST_IGNORE_WARNINGS = (
     # acis_thermal_check/utils.py:290
     # acis_thermal_check/utils.py:272
     # Ska/Matplotlib/core.py:145
-    "-Wignore: linestyle is redundantly defined by the 'linestyle' keyword",
+    "-Wignore: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string",
+
+    # Ska/Matplotlib/core.py:145
+    "-Wignore: color is redundantly defined by the 'color' keyword argument and the fmt string",
 
     # annie/telem.py:18
     #  (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
