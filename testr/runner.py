@@ -29,23 +29,9 @@ PYTEST_IGNORE_WARNINGS = (
     # This warning comes about when running with the latest version MarksupSafe (>=2.0) but an old version of Jinja2<3.0.
     "-Wignore: 'soft_unicode' has been renamed to 'soft_str'",
 
-    # acis_thermal_check/utils.py:164
-    # acis_thermal_check/utils.py:269
-    # acis_thermal_check/utils.py:290
-    # acis_thermal_check/utils.py:272
-    # Ska/Matplotlib/core.py:145
-    "-Wignore: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string",
-
-    # Ska/Matplotlib/core.py:145
-    "-Wignore: color is redundantly defined by the 'color' keyword argument and the fmt string",
-
     # annie/telem.py:18
     #  (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
     "-Wignore:  Creating an ndarray from ragged nested sequences",
-
-    # proseco/report_acq.py:477
-    # proseco/report_acq.py:480
-    "-Wignore: FixedFormatter should only be used together with FixedLocator",
     )
 
 
