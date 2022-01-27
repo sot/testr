@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>testr.runner &#8212; testr 4.6.0 documentation</title>
+    <title>testr.runner &#8212; testr 4.7.0 documentation</title>
     <link rel="stylesheet" href="../../_static/bootstrap-astropy.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     
@@ -47,7 +47,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="../../index.html">testr 4.6.0 documentation</a>
+	<a href="../../index.html">testr 4.7.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
@@ -86,7 +86,18 @@
     <span class="s1">&#39;-Wignore:parse functions are required to provide a named:PendingDeprecationWarning&#39;</span><span class="p">,</span>
 
     <span class="c1"># Shows up in sparkles from importing bleach</span>
-    <span class="s1">&#39;-Wignore:Using or importing the ABCs:DeprecationWarning&#39;</span><span class="p">)</span>
+    <span class="s1">&#39;-Wignore:Using or importing the ABCs:DeprecationWarning&#39;</span><span class="p">,</span>
+
+    <span class="c1"># Shows up in several places from importing PyTables</span>
+    <span class="s1">&#39;-Wignore:`np.object` is a deprecated alias for the builtin `object`&#39;</span><span class="p">,</span>
+
+    <span class="c1"># This warning comes about when running with the latest version MarksupSafe (&gt;=2.0) but an old version of Jinja2&lt;3.0.</span>
+    <span class="s2">&quot;-Wignore: &#39;soft_unicode&#39; has been renamed to &#39;soft_str&#39;&quot;</span><span class="p">,</span>
+
+    <span class="c1"># annie/telem.py:18</span>
+    <span class="c1">#  (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify &#39;dtype=object&#39; when creating the ndarray.</span>
+    <span class="s2">&quot;-Wignore:  Creating an ndarray from ragged nested sequences&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 
 
 <div class="viewcode-block" id="TestError"><a class="viewcode-back" href="../../index.html#testr.runner.TestError">[docs]</a><span class="k">class</span> <span class="nc">TestError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
