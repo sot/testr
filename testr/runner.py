@@ -21,7 +21,18 @@ PYTEST_IGNORE_WARNINGS = (
     '-Wignore:parse functions are required to provide a named:PendingDeprecationWarning',
 
     # Shows up in sparkles from importing bleach
-    '-Wignore:Using or importing the ABCs:DeprecationWarning')
+    '-Wignore:Using or importing the ABCs:DeprecationWarning',
+
+    # Shows up in several places from importing PyTables
+    '-Wignore:`np.object` is a deprecated alias for the builtin `object`',
+
+    # This warning comes about when running with the latest version MarksupSafe (>=2.0) but an old version of Jinja2<3.0.
+    "-Wignore: 'soft_unicode' has been renamed to 'soft_str'",
+
+    # annie/telem.py:18
+    #  (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
+    "-Wignore:  Creating an ndarray from ragged nested sequences",
+    )
 
 
 class TestError(Exception):
