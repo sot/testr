@@ -146,24 +146,18 @@ def test(*args, **kwargs):
         package = os.path.basename(os.path.dirname(os.path.abspath(calling_func_file)))
         module = importlib.import_module(package)
         calling_func_file = module.__file__
-        calling_func_module = module.__name__
     else:
         # In this case the module that called this function is the package __init__.py.
         # We get the module directly without doing another import.
         calling_frame = calling_frame_record[0]
         calling_frame_filename = calling_frame_record[1]
-        calling_func_name = calling_frame_record[3]
-        calling_func_module = calling_frame.f_globals[calling_func_name].__module__
         if get_version:
             return get_full_version(calling_frame.f_globals,
                                     calling_frame_filename)
 
-    pkg_names = calling_func_module.split('.')
-    pkg_paths = [os.path.dirname(calling_func_file)] + ['..'] * len(pkg_names)
-    pkg_dir = os.path.join(*pkg_names)
+    pkg_dir = os.path.dirname(calling_func_file)
 
-    with chdir(os.path.join(*pkg_paths)):
-        n_fail = pytest.main([pkg_dir] + list(args), **kwargs)
+    n_fail = pytest.main([pkg_dir] + list(args), **kwargs)
 
     if n_fail and raise_exception:
         raise TestError('got {} failure(s)'.format(n_fail))
