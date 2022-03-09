@@ -97,17 +97,20 @@ def is_32_bit():
     return sys.maxsize <= 2 ** 32
 
 
-def has_internet(host="8.8.8.8", port=53, timeout=3):
-    """Return True if internet is available by trying to reach ``host``.
+def has_internet(url='https://google.com', timeout=3):
+    """Return True if internet is available by trying to get ``url``.
 
-    Adapted from https://stackoverflow.com/questions/3764291
-    
+    Note that using sockets and https://stackoverflow.com/questions/3764291 has
+    problems:
+
+    - Using 8.8.8.8 and port 53 seems to not detect no internet access on Mac.
+    - Using socket.create_connection(('https://google.com', 443)) seems to
+      unexpectedly succeed on cheru.
+
     Parameters
     ----------
-    host : str
-        Host IP to reach (default=8.8.8.8 (google-public-dns-a.google.com))
-    port : int
-        Port to use (default=53)
+    url : str
+        URL to get (default=google.com)
     timeout : int, float
         Timeout in seconds (default=3)
 
@@ -115,10 +118,9 @@ def has_internet(host="8.8.8.8", port=53, timeout=3):
     -------
     has_internet : bool
     """
-    import socket
+    import urllib.request
     try:
-        socket.setdefaulttimeout(timeout)
-        socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
+        urllib.request.urlopen(url, timeout=timeout)
         return True
-    except socket.error:
+    except Exception:
         return False
