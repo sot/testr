@@ -159,8 +159,8 @@ def test(*args, **kwargs):
                                     calling_frame_filename)
 
     pkg_dir = os.path.dirname(calling_func_file)
-
-    n_fail = pytest.main([pkg_dir] + list(args), **kwargs)
+    with chdir(os.environ.get('TESTR_OUT_DIR', '.')):
+        n_fail = pytest.main([pkg_dir] + list(args), **kwargs)
 
     if n_fail and raise_exception:
         raise TestError('got {} failure(s)'.format(n_fail))
