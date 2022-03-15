@@ -133,6 +133,14 @@ def test(*args, **kwargs):
     # flight directory if tests fail running on installed package.
     args = args + ('-p', 'no:cacheprovider')
 
+    if 'TESTR_ALLOW_HYPOTHESIS' not in os.environ:
+        # Disable autoload of hypothesis plugin which causes warnings due to
+        # trying to write to .hypothesis dir from the cwd of test runner. See
+        # slack #aspect-team "falling back to an in-memory database for this
+        # session" for more info.
+        args += ('-p', 'no:hypothesispytest')  # current name for disabling
+        args += ('-p', 'no:hypothesis')  # possible future name
+
     stack_level = kwargs.pop('stack_level', 1)
     calling_frame_record = inspect.stack()[stack_level]  # Only works for stack-based Python
     calling_func_file = calling_frame_record[1]
