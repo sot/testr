@@ -4,16 +4,16 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>testr &#8212; testr 4.7.0 documentation</title>
-    <link rel="stylesheet" href="_static/bootstrap-astropy.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>testr &#8212; testr 4.8.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/bootstrap-astropy.css" />
     
-    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
-    <script src="_static/language_data.js"></script>
     <script type="text/javascript" src="_static/sidebar.js"></script>
     <script type="text/javascript" src="_static/copybutton.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -47,7 +47,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="#">testr 4.7.0 documentation</a>
+	<a href="#">testr 4.8.0 documentation</a>
 	 &#187;
       </li>
       
@@ -61,7 +61,7 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="testr">
+  <section id="testr">
 <h1>testr<a class="headerlink" href="#testr" title="Permalink to this headline">¶</a></h1>
 <p>The <code class="docutils literal notranslate"><span class="pre">testr</span></code> package provides a framework for unit, regression, and integration
 testing of a set of packages within a production runtime environment.  The
@@ -72,7 +72,7 @@ Python package unit tests.  This includes a <code class="docutils literal notran
 helper functions.</p>
 <div class="toctree-wrapper compound">
 </div>
-<div class="section" id="package-testing-unit-regression-integration">
+<section id="package-testing-unit-regression-integration">
 <h2>Package testing: unit, regression, integration<a class="headerlink" href="#package-testing-unit-regression-integration" title="Permalink to this headline">¶</a></h2>
 <p>The use case here is a production environment where one has the capability (and indeed
 requirement) to build and test within a testing environment prior to deploying to
@@ -98,7 +98,7 @@ updated environment.  This overlaps with unit and regression testing, but
 is linked to potential cross-package issues.  A key example is updating
 a core package that may produce unexpected results or issue deprecation
 warnings downstream that are not desirable.</p>
-<div class="section" id="basic-structure">
+<section id="basic-structure">
 <h3>Basic structure<a class="headerlink" href="#basic-structure" title="Permalink to this headline">¶</a></h3>
 <p>When <code class="docutils literal notranslate"><span class="pre">testr</span></code> is installed it creates a console script <code class="docutils literal notranslate"><span class="pre">run_testr</span></code> that can
 be run from the command line in your environment testing directory.  This
@@ -119,22 +119,22 @@ be a git / GitHub repository.</p>
     <span class="n">post_regress_long</span><span class="o">.</span><span class="n">py</span>  <span class="c1"># Copy regression output files to the regress/ directory</span>
 </pre></div>
 </div>
-<div class="section" id="get-version-id">
+<section id="get-version-id">
 <h4>get_version_id<a class="headerlink" href="#get-version-id" title="Permalink to this headline">¶</a></h4>
 <p>The <code class="docutils literal notranslate"><span class="pre">get_version_id</span></code> file must be an executable script or program that produces
 a single line of output corresponding to a unique version identifier for the
 environment.  This is used to organize the outputs by version and later to
 compare the regression outputs.  In the Ska runtime environment this script
 produces a version identifier like <code class="docutils literal notranslate"><span class="pre">0.18-r609-0d91665</span></code>.</p>
-</div>
-<div class="section" id="packages">
+</section>
+<section id="packages">
 <h4>Packages<a class="headerlink" href="#packages" title="Permalink to this headline">¶</a></h4>
 <p>The <code class="docutils literal notranslate"><span class="pre">packages</span></code> directory must contain sub-directories corresponding to
 each package being explicitly tested.  For Python packages the directory
 name should be the same as the importable package name.  This allows the
 simple unit testing idiom (shown later) to infer the package name to import.</p>
-</div>
-<div class="section" id="test-scripts">
+</section>
+<section id="test-scripts">
 <h4>Test scripts<a class="headerlink" href="#test-scripts" title="Permalink to this headline">¶</a></h4>
 <p>Test scripts are located within the package sub-directory.  The key concept to understand
 here is that the tests consist entirely of scripts or executable files that have the
@@ -149,8 +149,8 @@ a non-successful exit status (not 0) for FAIL.</p></li>
 </ul>
 <p>Those are the only rules, so the testing can run the gamut from simple
 to arbitrarily complex.</p>
-</div>
-<div class="section" id="post-processing-scripts">
+</section>
+<section id="post-processing-scripts">
 <h4>Post-processing scripts<a class="headerlink" href="#post-processing-scripts" title="Permalink to this headline">¶</a></h4>
 <p>After the tests are run then any post-processing scripts in the package directory will be
 run (again in alphabetical order).  These are exactly the same as test files except:</p>
@@ -161,8 +161,8 @@ run (again in alphabetical order).  These are exactly the same as test files exc
 <p>A key point is that the post-processing scripts can generate failures. For
 instance a common task is checking the output log files for unexpected warnings
 that do not generate a failure.</p>
-</div>
-<div class="section" id="environment-variables">
+</section>
+<section id="environment-variables">
 <h4>Environment variables<a class="headerlink" href="#environment-variables" title="Permalink to this headline">¶</a></h4>
 <p>Several environment variables are defined prior to spawning jobs that run the
 test or post-processing scripts.</p>
@@ -197,8 +197,8 @@ test or post-processing scripts.</p>
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section" id="filename-conventions">
+</section>
+<section id="filename-conventions">
 <h4>Filename conventions<a class="headerlink" href="#filename-conventions" title="Permalink to this headline">¶</a></h4>
 <p>There are no <em>required</em> conventions beyond the previously mentioned rules, but
 following some simple conventions will make life easier and more organized.  This
@@ -233,9 +233,9 @@ by underscores.</p>
 </table>
 <p>Standard filenames and examples of the keywords are shown in the example
 directory structure above.</p>
-</div>
-</div>
-<div class="section" id="running-the-tests">
+</section>
+</section>
+<section id="running-the-tests">
 <h3>Running the tests<a class="headerlink" href="#running-the-tests" title="Permalink to this headline">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">run_testr</span></code> command has the following options:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ run_testr --help
@@ -316,8 +316,8 @@ the current directory or any sub-directories therein.</p>
         <span class="n">big_data</span><span class="o">.</span><span class="n">dat</span>        <span class="c1"># More data</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="selecting-tests">
+</section>
+<section id="selecting-tests">
 <h3>Selecting tests<a class="headerlink" href="#selecting-tests" title="Permalink to this headline">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">--include</span></code> and <code class="docutils literal notranslate"><span class="pre">--exclude</span></code> options can be used to select specific tests and
 post-process scripts.  The default is to include all files.</p>
@@ -336,8 +336,8 @@ $ run_testr --exclude=&#39;*_long&#39;    # exclude long tests
 $ run_testr --exclude=&#39;*_long,*_unit&#39; # exclude long and unit tests
 </pre></div>
 </div>
-</div>
-<div class="section" id="comparing-regression-outputs">
+</section>
+<section id="comparing-regression-outputs">
 <h3>Comparing regression outputs<a class="headerlink" href="#comparing-regression-outputs" title="Permalink to this headline">¶</a></h3>
 <p>In this example the 0.18-r609-0d91665 regress outputs might correspond to
 the current production installation.  Then suppose you create a test
@@ -353,8 +353,8 @@ to strip them of uninteresting diffs like a date or the user that ran the
 tests.  See the <a class="reference internal" href="#post-regress-py">post_regress.py</a> example for more discussion on that.</p>
 <p>One option from here is to copy the regress outputs into a git-versioned repo
 in a new branch and then use GitHub to do comparisons.</p>
-</div>
-<div class="section" id="test-specification-files">
+</section>
+<section id="test-specification-files">
 <h3>Test specification files<a class="headerlink" href="#test-specification-files" title="Permalink to this headline">¶</a></h3>
 <p>One might like to maintain a set of unit and regression tests in a single
 testing repository but to run somewhat different combinations of those tests in
@@ -387,12 +387,12 @@ provided on the command line.</p></li>
 <span class="o">-*</span><span class="n">_long</span><span class="o">*</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="file-recipes">
+</section>
+<section id="file-recipes">
 <h3>File recipes<a class="headerlink" href="#file-recipes" title="Permalink to this headline">¶</a></h3>
 <p>Here we show some example testing files taken from <a class="reference external" href="https://github.com/sot/ska_testr">ska_testr</a> GitHub repository in order to
 illustrate some useful recipes or idioms.</p>
-<div class="section" id="test-unit-py">
+<section id="test-unit-py">
 <h4>test_unit.py<a class="headerlink" href="#test-unit-py" title="Permalink to this headline">¶</a></h4>
 <p>Python packages that have built-in (inline) unit tests (see <a class="reference internal" href="#python-testing-helpers">Python testing helpers</a>)
 can be tested with the following:</p>
@@ -411,8 +411,8 @@ The important thing is to raise an exception if there were test failures:</p>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">n_fail</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; test failures&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="test-unit-git-sh">
+</section>
+<section id="test-unit-git-sh">
 <h4>test_unit_git.sh<a class="headerlink" href="#test-unit-git-sh" title="Permalink to this headline">¶</a></h4>
 <p>Python packages that do not have inline unit tests or for other reasons
 require the source repo for unit testing can use the following recipe:</p>
@@ -424,8 +424,8 @@ py.test -v -s
 </div>
 <p>This illustrates some environment variables that are always defined when
 running test code.</p>
-</div>
-<div class="section" id="post-regress-py">
+</section>
+<section id="post-regress-py">
 <h4>post_regress.py<a class="headerlink" href="#post-regress-py" title="Permalink to this headline">¶</a></h4>
 <p>Here is an example from the Ska <a class="reference external" href="https://github.com/sot/ska_testr/tree/master/packages/dpa_check">dpa_check test</a> that copies a few
 key outputs into the <code class="docutils literal notranslate"><span class="pre">regress</span></code> directory after stripping out the
@@ -443,8 +443,8 @@ user name and run time.</p>
 <span class="n">make_regress_files</span><span class="p">(</span><span class="n">regress_files</span><span class="p">,</span> <span class="n">clean</span><span class="o">=</span><span class="n">clean</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="post-check-logs-py">
+</section>
+<section id="post-check-logs-py">
 <h4>post_check_logs.py<a class="headerlink" href="#post-check-logs-py" title="Permalink to this headline">¶</a></h4>
 <p>Here is an example again from the Ska <a class="reference external" href="https://github.com/sot/ska_testr/tree/master/packages/dpa_check">dpa_check test</a> that checks the
 test processing log files for any occurrences of <code class="docutils literal notranslate"><span class="pre">warning</span></code> or <code class="docutils literal notranslate"><span class="pre">error</span></code>.
@@ -458,8 +458,8 @@ a FAIL for this package:</p>
             <span class="n">allows</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;99% quantile value of&#39;</span><span class="p">,</span> <span class="s1">&#39;in output at out&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="test-regress-long-sh">
+</section>
+<section id="test-regress-long-sh">
 <h4>test_regress_long.sh<a class="headerlink" href="#test-regress-long-sh" title="Permalink to this headline">¶</a></h4>
 <p>This is an example that is not really a recipe but a demonstration of
 doing a complex regression test that requires some setup and uses
@@ -493,9 +493,9 @@ STOP=&#39;2015:030&#39;
 <a class="reference external" href="https://github.com/sot/ska_testr/tree/master/packages/Ska.engarchive">Ska.engarchive</a>
 package.  This one is slightly different because it generates new database
 values and then immediately compares with the current production database.</p>
-</div>
-</div>
-<div class="section" id="summary-logs">
+</section>
+</section>
+<section id="summary-logs">
 <h3>Summary Logs<a class="headerlink" href="#summary-logs" title="Permalink to this headline">¶</a></h3>
 <p>Testr produces a summary log which includes all tests run. It parses the logs produced by pytest, and tests are grouped
 in suites following the test hierarchy. Tests that do not use pytest are grouped in a test suite at the top level.
@@ -587,9 +587,9 @@ The log is written in JSON format and looks something like the following:</p>
 <span class="p">}</span>
 </pre></div>
 </div>
-</div>
-</div>
-<div class="section" id="python-testing-helpers">
+</section>
+</section>
+<section id="python-testing-helpers">
 <h2>Python testing helpers<a class="headerlink" href="#python-testing-helpers" title="Permalink to this headline">¶</a></h2>
 <p>The modules <code class="docutils literal notranslate"><span class="pre">testr.runner</span></code> and <code class="docutils literal notranslate"><span class="pre">testr.setup_helper</span></code> provide the infrastructure
 to enable easy and uniform running of pytest test functions in two ways:</p>
@@ -598,7 +598,7 @@ to enable easy and uniform running of pytest test functions in two ways:</p>
 <li><p>Within a local development repo using <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">test</span> <span class="pre">--args='arg1</span> <span class="pre">kwarg2=val2'</span></code> where
 <code class="docutils literal notranslate"><span class="pre">arg1</span></code> and <code class="docutils literal notranslate"><span class="pre">kwarg2</span></code> are valid pytest arguments.</p></li>
 </ul>
-<div class="section" id="init-py">
+<section id="init-py">
 <h3><code class="docutils literal notranslate"><span class="pre">__init__.py</span></code><a class="headerlink" href="#init-py" title="Permalink to this headline">¶</a></h3>
 <p>Typical usage within the package <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> file:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -625,8 +625,8 @@ distribution.  The following package layout shows an example of such inlined tes
 in the production environment, providing positive confirmation that the actual
 installed package is working as expected.  See the next section for an example
 <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> file which shows including this inline test sub-package.</p>
-</div>
-<div class="section" id="setup-py">
+</section>
+<section id="setup-py">
 <h3><code class="docutils literal notranslate"><span class="pre">setup.py</span></code><a class="headerlink" href="#setup-py" title="Permalink to this headline">¶</a></h3>
 <p>Typical usage in <code class="docutils literal notranslate"><span class="pre">setup.py</span></code>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">setuptools</span> <span class="kn">import</span> <span class="n">setup</span>
@@ -643,28 +643,28 @@ installed package is working as expected.  See the next section for an example
       <span class="p">)</span>
 </pre></div>
 </div>
-</div>
-</div>
-<div class="section" id="api">
+</section>
+</section>
+<section id="api">
 <h2>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="module-testr.runner">
+<section id="module-testr.runner">
 <span id="testr-runner"></span><h3>testr.runner<a class="headerlink" href="#module-testr.runner" title="Permalink to this headline">¶</a></h3>
 <p>Provide a test() function that can be called from package __init__.</p>
 <dl class="py exception">
-<dt id="testr.runner.TestError">
-<em class="property">exception </em><code class="sig-prename descclassname">testr.runner.</code><code class="sig-name descname">TestError</code><a class="reference internal" href="_modules/testr/runner.html#TestError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#testr.runner.TestError" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="testr.runner.TestError">
+<em class="property"><span class="pre">exception</span> </em><span class="sig-prename descclassname"><span class="pre">testr.runner.</span></span><span class="sig-name descname"><span class="pre">TestError</span></span><a class="reference internal" href="_modules/testr/runner.html#TestError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#testr.runner.TestError" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="testr.runner.get_full_version">
-<code class="sig-prename descclassname">testr.runner.</code><code class="sig-name descname">get_full_version</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">calling_frame_globals</span></em>, <em class="sig-param"><span class="n">calling_frame_filename</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/testr/runner.html#get_full_version"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#testr.runner.get_full_version" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="testr.runner.get_full_version">
+<span class="sig-prename descclassname"><span class="pre">testr.runner.</span></span><span class="sig-name descname"><span class="pre">get_full_version</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">calling_frame_globals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calling_frame_filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/testr/runner.html#get_full_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#testr.runner.get_full_version" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a full version which includes git info if the module was imported
 from the git repo source directory.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="testr.runner.test">
-<code class="sig-prename descclassname">testr.runner.</code><code class="sig-name descname">test</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/testr/runner.html#test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#testr.runner.test" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="testr.runner.test">
+<span class="sig-prename descclassname"><span class="pre">testr.runner.</span></span><span class="sig-name descname"><span class="pre">test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/testr/runner.html#test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#testr.runner.test" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run py.test unit tests for the calling package with specified
 <code class="docutils literal notranslate"><span class="pre">args</span></code> and <code class="docutils literal notranslate"><span class="pre">kwargs</span></code>.</p>
 <p>This temporarily changes to the directory above the installed package
@@ -690,8 +690,8 @@ used to make a shell-level failure.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="testr.runner.testr">
-<code class="sig-prename descclassname">testr.runner.</code><code class="sig-name descname">testr</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/testr/runner.html#testr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#testr.runner.testr" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="testr.runner.testr">
+<span class="sig-prename descclassname"><span class="pre">testr.runner.</span></span><span class="sig-name descname"><span class="pre">testr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/testr/runner.html#testr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#testr.runner.testr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run py.test unit tests for the calling package.  This just calls the <code class="docutils literal notranslate"><span class="pre">test()</span></code>
 function but includes defaults that are more appropriate for integrated package
 testing using run_testr.</p>
@@ -712,19 +712,19 @@ testing using run_testr.</p>
 </dl>
 </dd></dl>
 
-</div>
-<div class="section" id="module-testr.setup_helper">
+</section>
+<section id="module-testr.setup_helper">
 <span id="testr-setup-helper"></span><h3>testr.setup_helper<a class="headerlink" href="#module-testr.setup_helper" title="Permalink to this headline">¶</a></h3>
 <p>Define a test runner command class suitable for use in <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> so
 that <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">test</span></code> runs tests via pytest.</p>
 <dl class="py class">
-<dt id="testr.setup_helper.PyTest">
-<em class="property">class </em><code class="sig-prename descclassname">testr.setup_helper.</code><code class="sig-name descname">PyTest</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dist</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kw</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/testr/setup_helper.html#PyTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#testr.setup_helper.PyTest" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="testr.setup_helper.PyTest">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">testr.setup_helper.</span></span><span class="sig-name descname"><span class="pre">PyTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dist</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/testr/setup_helper.html#PyTest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#testr.setup_helper.PyTest" title="Permalink to this definition">¶</a></dt>
 <dd><p>Test runner command class suitable for use in <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> so
 that <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">test</span></code> runs tests via pytest.</p>
 <dl class="py method">
-<dt id="testr.setup_helper.PyTest.initialize_options">
-<code class="sig-name descname">initialize_options</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/testr/setup_helper.html#PyTest.initialize_options"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#testr.setup_helper.PyTest.initialize_options" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="testr.setup_helper.PyTest.initialize_options">
+<span class="sig-name descname"><span class="pre">initialize_options</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/testr/setup_helper.html#PyTest.initialize_options"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#testr.setup_helper.PyTest.initialize_options" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set default values for all the options that this command
 supports.  Note that these defaults may be overridden by other
 commands, by the setup script, by config files, or by the
@@ -736,44 +736,44 @@ are just a bunch of “self.foo = None” assignments.</p>
 
 </dd></dl>
 
-</div>
-<div class="section" id="module-testr.test_helper">
+</section>
+<section id="module-testr.test_helper">
 <span id="testr-test-helper"></span><h3>testr.test_helper<a class="headerlink" href="#module-testr.test_helper" title="Permalink to this headline">¶</a></h3>
 <p>Provide helper functions that are useful for unit testing.</p>
 <dl class="py function">
-<dt id="testr.test_helper.has_dirs">
-<code class="sig-prename descclassname">testr.test_helper.</code><code class="sig-name descname">has_dirs</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">paths</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/testr/test_helper.html#has_dirs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#testr.test_helper.has_dirs" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="testr.test_helper.has_dirs">
+<span class="sig-prename descclassname"><span class="pre">testr.test_helper.</span></span><span class="sig-name descname"><span class="pre">has_dirs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">paths</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/testr/test_helper.html#has_dirs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#testr.test_helper.has_dirs" title="Permalink to this definition">¶</a></dt>
 <dd><p>All of the <code class="docutils literal notranslate"><span class="pre">paths</span></code> exist and each is a directory</p>
 <p>Input path(s) can contain ~ (home dir) or environment variables like $SKA or
 ${SKA}.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="testr.test_helper.has_paths">
-<code class="sig-prename descclassname">testr.test_helper.</code><code class="sig-name descname">has_paths</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">paths</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/testr/test_helper.html#has_paths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#testr.test_helper.has_paths" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="testr.test_helper.has_paths">
+<span class="sig-prename descclassname"><span class="pre">testr.test_helper.</span></span><span class="sig-name descname"><span class="pre">has_paths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">paths</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/testr/test_helper.html#has_paths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#testr.test_helper.has_paths" title="Permalink to this definition">¶</a></dt>
 <dd><p>All of the <code class="docutils literal notranslate"><span class="pre">paths</span></code> exist</p>
 <p>Input path(s) can contain ~ (home dir) or environment variables like $SKA or
 ${SKA}.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="testr.test_helper.has_sybase">
-<code class="sig-prename descclassname">testr.test_helper.</code><code class="sig-name descname">has_sybase</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/testr/test_helper.html#has_sybase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#testr.test_helper.has_sybase" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="testr.test_helper.has_sybase">
+<span class="sig-prename descclassname"><span class="pre">testr.test_helper.</span></span><span class="sig-name descname"><span class="pre">has_sybase</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/testr/test_helper.html#has_sybase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#testr.test_helper.has_sybase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return True if the system apparently can run Sybase queries from Python.</p>
 <p>In detail, this is True if the SYBASE and SYBASE_OCS env variables are set
 and the correct Python shared object library exists on the system.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="testr.test_helper.on_head_network">
-<code class="sig-prename descclassname">testr.test_helper.</code><code class="sig-name descname">on_head_network</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/testr/test_helper.html#on_head_network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#testr.test_helper.on_head_network" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="testr.test_helper.on_head_network">
+<span class="sig-prename descclassname"><span class="pre">testr.test_helper.</span></span><span class="sig-name descname"><span class="pre">on_head_network</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/testr/test_helper.html#on_head_network"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#testr.test_helper.on_head_network" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return True if the system is apparently on the HEAD network.</p>
 <p>This looks for subnets 52 (e.g. fido, lato) and 184 (kadi) on 131.142.xxx.</p>
 </dd></dl>
 
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
             <div class="clearer"></div>
@@ -848,7 +848,7 @@ and the correct Python shared object library exists on the system.</p>
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2016, Tom Aldcroft.<br/>
-    Created using <a href="http://www.sphinx-doc.org/en/stable/">Sphinx</a> 3.1.2. &nbsp;
+    Created using <a href="http://www.sphinx-doc.org/en/stable/">Sphinx</a> 4.2.0. &nbsp;
   </p>
 </footer>
   </body>

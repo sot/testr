@@ -4,16 +4,15 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>testr.test_helper &#8212; testr 4.7.0 documentation</title>
-    <link rel="stylesheet" href="../../_static/bootstrap-astropy.css" type="text/css" />
-    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>testr.test_helper &#8212; testr 4.8.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-astropy.css" />
     
-    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
     <script src="../../_static/doctools.js"></script>
-    <script src="../../_static/language_data.js"></script>
     <script type="text/javascript" src="../../_static/sidebar.js"></script>
     <script type="text/javascript" src="../../_static/copybutton.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -47,7 +46,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="../../index.html">testr 4.7.0 documentation</a>
+	<a href="../../index.html">testr 4.8.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
@@ -162,17 +161,20 @@
     <span class="k">return</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span> <span class="o">&lt;=</span> <span class="mi">2</span> <span class="o">**</span> <span class="mi">32</span>
 
 
-<span class="k">def</span> <span class="nf">has_internet</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s2">&quot;8.8.8.8&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">53</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Return True if internet is available by trying to reach ``host``.</span>
+<span class="k">def</span> <span class="nf">has_internet</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s1">&#39;https://google.com&#39;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return True if internet is available by trying to get ``url``.</span>
 
-<span class="sd">    Adapted from https://stackoverflow.com/questions/3764291</span>
-<span class="sd">    </span>
+<span class="sd">    Note that using sockets and https://stackoverflow.com/questions/3764291 has</span>
+<span class="sd">    problems:</span>
+
+<span class="sd">    - Using 8.8.8.8 and port 53 seems to not detect no internet access on Mac.</span>
+<span class="sd">    - Using socket.create_connection((&#39;https://google.com&#39;, 443)) seems to</span>
+<span class="sd">      unexpectedly succeed on cheru.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    host : str</span>
-<span class="sd">        Host IP to reach (default=8.8.8.8 (google-public-dns-a.google.com))</span>
-<span class="sd">    port : int</span>
-<span class="sd">        Port to use (default=53)</span>
+<span class="sd">    url : str</span>
+<span class="sd">        URL to get (default=google.com)</span>
 <span class="sd">    timeout : int, float</span>
 <span class="sd">        Timeout in seconds (default=3)</span>
 
@@ -180,12 +182,11 @@
 <span class="sd">    -------</span>
 <span class="sd">    has_internet : bool</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">import</span> <span class="nn">socket</span>
+    <span class="kn">import</span> <span class="nn">urllib.request</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">socket</span><span class="o">.</span><span class="n">setdefaulttimeout</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
-        <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">)</span><span class="o">.</span><span class="n">connect</span><span class="p">((</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">))</span>
+        <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">True</span>
-    <span class="k">except</span> <span class="n">socket</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">False</span>
 </pre></div>
 
@@ -211,7 +212,7 @@
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2016, Tom Aldcroft.<br/>
-    Created using <a href="http://www.sphinx-doc.org/en/stable/">Sphinx</a> 3.1.2. &nbsp;
+    Created using <a href="http://www.sphinx-doc.org/en/stable/">Sphinx</a> 4.2.0. &nbsp;
   </p>
 </footer>
   </body>
