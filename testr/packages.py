@@ -318,8 +318,10 @@ def run_tests(package, tests):
 
             test['t_stop'] = datetime.datetime.now().strftime('%Y:%m:%dT%H:%M:%S')
 
-    box_output(['{} Test Summary'.format(package)] +
-               ['{:20s} {}'.format(test['file'], test['status']) for test in tests])
+    box_output(
+        ['{} Test Summary'.format(package)]
+        + ['{:20s} {}'.format(test['file'], test['status']) for test in tests]
+    )
 
 
 def get_results_table(tests):
