@@ -66,6 +66,13 @@ def get_option_parser():
                         action="store_true",
                         help=('Collect tests but do not run'),
                         )
+    parser.add_argument("--coverage",
+                        action="store_true",
+                        help=('Measure testing coverage'),
+                        )
+    parser.add_argument("--coverage-config",
+                        help=('Coverage init file'),
+                        )
     parser.add_argument("--packages-repo",
                         default='https://github.com/sot',
                         help=("Base URL for package git repos"),
@@ -182,7 +189,9 @@ def collect_tests():
                         'regress_dir': regress_dir,
                         'packages_repo': opt.packages_repo,
                         'package': package,
-                        'package_version': version}
+                        'package_version': version,
+                        'coverage': opt.coverage,
+                        'coverage_config': opt.coverage_config}
 
                 tests[package].append(test)
 
@@ -701,6 +710,8 @@ def process_opt():
     outputs_subdir = get_version_id()
     opt.log_dir = (opt.outputs_dir / 'logs' / outputs_subdir).absolute()
     opt.regress_dir = (opt.outputs_dir / 'regress' / outputs_subdir).absolute()
+    if opt.coverage_config is None:
+        opt.coverage_config = opt.root / 'coverage.ini'
 
     if not os.path.exists(opt.packages_dir):
         parser.error(
@@ -738,6 +749,28 @@ def process_opt():
     return opt
 
 
+def combine_coverage():
+    import shutil
+    import site
+    directories = []
+    for cf in opt.log_dir.glob('*/.coverage*'):
+        shutil.move(cf, f'{cf}.{cf.parent.name}')
+        if cf.parent not in directories:
+            directories.append(cf.parent)
+
+    subprocess.run(['coverage', 'combine', '--keep'] + directories, cwd=opt.log_dir)
+    # running the following command from <prefix>/lib/python/site-packages
+    # that is a bit of a hack so the report uses paths relative to it when possible
+    subprocess.run(
+        [
+            'coverage', 'html',
+            '--data-file', str(opt.log_dir / '.coverage'),
+            '--directory', opt.log_dir / 'coverage'
+        ],
+        cwd=site.getsitepackages()[0]
+    )
+
+
 def main():
     global opt, logger
     opt = process_opt()
@@ -753,6 +786,9 @@ def main():
     if not opt.collect_only:
         for package in sorted(tests):
             run_tests(package, tests[package])  # updates tests[package] in place
+
+    if opt.coverage:
+        combine_coverage()
 
     results = get_results_table(tests)
     if results:

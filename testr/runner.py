@@ -90,6 +90,8 @@ def test(*args, **kwargs):
     """
     # Local imports so that imports only get done when really needed.
     import os
+    import sys
+    import subprocess
     import inspect
     import pytest
     import contextlib
@@ -115,6 +117,13 @@ def test(*args, **kwargs):
     raise_exception = kwargs.pop('raise_exception', False)
     package_from_dir = kwargs.pop('package_from_dir', False)
     get_version = kwargs.pop('get_version', False)
+
+    with_coverage = (os.environ.get('TESTR_COVERAGE', '').lower().strip() in ['true'])
+    coverage_config = os.environ.get('TESTR_COVERAGE_CONFIG', 'no-coverage-config')
+    if with_coverage and not os.path.exists(coverage_config):
+        if raise_exception:
+            raise TestError(f'Coverage config is not found {coverage_config}')
+        return
 
     if 'TESTR_PYTEST_ARGS' in os.environ:
         args = args + tuple(os.environ['TESTR_PYTEST_ARGS'].split())
@@ -174,12 +183,26 @@ def test(*args, **kwargs):
     pkg_dir = os.path.join(*pkg_names)
 
     with chdir(os.path.join(*pkg_paths)):
-        n_fail = pytest.main([pkg_dir] + list(args), **kwargs)
+        if with_coverage:
+            coverage_file = os.path.join(
+                os.environ['TESTR_OUT_DIR'],
+                '.coverage'
+            )
+            cmd = [
+                'coverage', 'run',
+                f'--rcfile={coverage_config}',
+                f'--data-file={coverage_file}',
+                '-m', 'pytest', pkg_dir
+            ] + list(args) + [f'{k}={v}' for k, v in kwargs]
+            process = subprocess.run(cmd, stdout=sys.stdout, stderr=subprocess.STDOUT)
+            rc = process.returncode
+        else:
+            rc = pytest.main([pkg_dir] + list(args), **kwargs)
 
-    if n_fail and raise_exception:
-        raise TestError('got {} failure(s)'.format(n_fail))
+    if rc and raise_exception:
+        raise TestError('Failed')
 
-    return n_fail
+    return bool(rc)
 
 
 def get_full_version(calling_frame_globals, calling_frame_filename):
