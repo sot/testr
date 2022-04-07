@@ -29,7 +29,7 @@ opt = None
 logger = None
 
 
-def get_options():
+def get_option_parser():
     """
     Get options.
 
@@ -73,7 +73,7 @@ def get_options():
     parser.add_argument('--version', action='version', version=__version__)
     parser.set_defaults()
 
-    return parser.parse_args()
+    return parser
 
 
 class Tee(object):
@@ -691,6 +691,9 @@ def process_opt():
     Process options and make various inplace replacements for downstream
     convenience.
     """
+    parser = get_option_parser()
+    opt = parser.parse_args()
+
     # Set up directories
     opt.root = Path(opt.root).absolute()
     opt.outputs_dir = Path(opt.outputs_dir)
@@ -698,6 +701,13 @@ def process_opt():
     outputs_subdir = get_version_id()
     opt.log_dir = (opt.outputs_dir / 'logs' / outputs_subdir).absolute()
     opt.regress_dir = (opt.outputs_dir / 'regress' / outputs_subdir).absolute()
+
+    if not os.path.exists(opt.packages_dir):
+        parser.error(
+            f'Packages directory does not exist: {opt.packages_dir}. '
+            'This happens when you do not give the --root option '
+            'and do not run from within ska_testr'
+        )
 
     if opt.test_spec:
         opt.test_spec = Path(opt.test_spec)
@@ -725,12 +735,12 @@ def process_opt():
     # If opt.includes is not explicitly initialized after processing test_spec (which is
     # optional) then use ['*'] to include all tests
     opt.includes = opt.includes or ['*']
+    return opt
 
 
 def main():
     global opt, logger
-    opt = get_options()
-    process_opt()
+    opt = process_opt()
 
     test_dir = make_test_dir()
 
