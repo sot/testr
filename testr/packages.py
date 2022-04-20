@@ -18,7 +18,6 @@ import yaml
 
 
 import Ska.File
-from Ska.Shell import bash, ShellError
 from pyyaks.logger import get_logger
 from astropy.table import Table
 from cxotime import CxoTime
@@ -94,6 +93,34 @@ class Tee(object):
 
     def fileno(self):
         return sys.stdout.fileno()
+
+
+def communicate(process, log):
+    """
+    Real-time reading of a subprocess stdout.
+    Parameters
+    ----------
+    process:
+        process returned by subprocess.Popen
+    log: a stream object
+    """
+    if process.stdout is None:
+        process.wait()
+        return
+
+    while True:
+        if process.poll() is not None:
+            break
+        line = process.stdout.readline()
+        line = line if process.text_mode else line.decode()
+        log.write(line)
+        log.flush()
+
+    # in case the buffer is still not empty after the process ended
+    for line in process.stdout.readlines():
+        line = line if process.text_mode else line.decode()
+        log.write(line)
+        log.flush()
 
 
 def box_output(lines, min_width=40):
@@ -259,10 +286,9 @@ def run_tests(package, tests):
             # no interpreter assume the file is executable.
             test['t_start'] = datetime.datetime.now().strftime('%Y:%m:%dT%H:%M:%S')
 
+            # Need full environment in the subprocess run
+            env.update(os.environ)
             if test_helper.is_windows():
-                # Need full environment in the subprocess run
-                env.update(os.environ)
-
                 cmds = [sys.executable, test['file']]
                 try:
                     sub = subprocess.run(cmds, env=env, capture_output=True)
@@ -273,26 +299,29 @@ def run_tests(package, tests):
                 else:
                     test['status'] = 'pass' if sub.returncode == 0 else 'FAIL'
             else:
-                if interpreter == 'bash':
-                    with open(test['file'], 'r') as fh:
-                        cmd = fh.read()
-                elif interpreter is None:
-                    cmd = './' + test['file']
+                if interpreter is None:
+                    cmd = [f"./{test['file']}"]
                 else:
-                    cmd = interpreter + ' ' + test['file']
+                    cmd = [interpreter, test['file']]
 
                 try:
-                    bash(cmd, logfile=logfile, env=env)
-                except ShellError:
-                    # Test process returned a non-zero status => Fail
+                    process = None
+                    process = subprocess.Popen(
+                        cmd, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+                    )
+                    communicate(process, log=logfile)
+                except Exception:
                     test['status'] = 'FAIL'
                 else:
-                    test['status'] = 'pass'
+                    test_ok = (process is not None) and (process.returncode == 0)
+                    test['status'] = 'pass' if test_ok else 'FAIL'
 
             test['t_stop'] = datetime.datetime.now().strftime('%Y:%m:%dT%H:%M:%S')
 
-    box_output(['{} Test Summary'.format(package)] +
-               ['{:20s} {}'.format(test['file'], test['status']) for test in tests])
+    box_output(
+        ['{} Test Summary'.format(package)]
+        + ['{:20s} {}'.format(test['file'], test['status']) for test in tests]
+    )
 
 
 def get_results_table(tests):
