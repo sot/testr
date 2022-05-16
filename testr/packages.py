@@ -29,7 +29,7 @@ opt = None
 logger = None
 
 
-def get_options():
+def get_option_parser():
     """
     Get options.
 
@@ -66,6 +66,13 @@ def get_options():
                         action="store_true",
                         help=('Collect tests but do not run'),
                         )
+    parser.add_argument("--coverage",
+                        action="store_true",
+                        help=('Measure testing coverage'),
+                        )
+    parser.add_argument("--coverage-config",
+                        help=('Coverage init file'),
+                        )
     parser.add_argument("--packages-repo",
                         default='https://github.com/sot',
                         help=("Base URL for package git repos"),
@@ -73,7 +80,7 @@ def get_options():
     parser.add_argument('--version', action='version', version=__version__)
     parser.set_defaults()
 
-    return parser.parse_args()
+    return parser
 
 
 class Tee(object):
@@ -182,7 +189,9 @@ def collect_tests():
                         'regress_dir': regress_dir,
                         'packages_repo': opt.packages_repo,
                         'package': package,
-                        'package_version': version}
+                        'package_version': version,
+                        'coverage': opt.coverage,
+                        'coverage_config': opt.coverage_config}
 
                 tests[package].append(test)
 
@@ -691,6 +700,9 @@ def process_opt():
     Process options and make various inplace replacements for downstream
     convenience.
     """
+    parser = get_option_parser()
+    opt = parser.parse_args()
+
     # Set up directories
     opt.root = Path(opt.root).absolute()
     opt.outputs_dir = Path(opt.outputs_dir)
@@ -698,6 +710,15 @@ def process_opt():
     outputs_subdir = get_version_id()
     opt.log_dir = (opt.outputs_dir / 'logs' / outputs_subdir).absolute()
     opt.regress_dir = (opt.outputs_dir / 'regress' / outputs_subdir).absolute()
+    if opt.coverage_config is None:
+        opt.coverage_config = opt.root / 'coverage.ini'
+
+    if not os.path.exists(opt.packages_dir):
+        parser.error(
+            f'Packages directory does not exist: {opt.packages_dir}. '
+            'This happens when you do not give the --root option '
+            'and do not run from within ska_testr'
+        )
 
     if opt.test_spec:
         opt.test_spec = Path(opt.test_spec)
@@ -725,12 +746,34 @@ def process_opt():
     # If opt.includes is not explicitly initialized after processing test_spec (which is
     # optional) then use ['*'] to include all tests
     opt.includes = opt.includes or ['*']
+    return opt
+
+
+def combine_coverage():
+    import shutil
+    import site
+    directories = []
+    for cf in opt.log_dir.glob('*/.coverage*'):
+        shutil.move(cf, f'{cf}.{cf.parent.name}')
+        if cf.parent not in directories:
+            directories.append(cf.parent)
+
+    subprocess.run(['coverage', 'combine', '--keep'] + directories, cwd=opt.log_dir)
+    # running the following command from <prefix>/lib/python/site-packages
+    # that is a bit of a hack so the report uses paths relative to it when possible
+    subprocess.run(
+        [
+            'coverage', 'html',
+            '--data-file', str(opt.log_dir / '.coverage'),
+            '--directory', opt.log_dir / 'coverage'
+        ],
+        cwd=site.getsitepackages()[0]
+    )
 
 
 def main():
     global opt, logger
-    opt = get_options()
-    process_opt()
+    opt = process_opt()
 
     test_dir = make_test_dir()
 
@@ -743,6 +786,9 @@ def main():
     if not opt.collect_only:
         for package in sorted(tests):
             run_tests(package, tests[package])  # updates tests[package] in place
+
+    if opt.coverage:
+        combine_coverage()
 
     results = get_results_table(tests)
     if results:
