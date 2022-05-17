@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>testr.runner &#8212; testr 4.9.0 documentation</title>
+    <title>testr.runner &#8212; testr 4.10.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-astropy.css" />
     
@@ -46,7 +46,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="../../index.html">testr 4.9.0 documentation</a>
+	<a href="../../index.html">testr 4.10.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
@@ -154,6 +154,8 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Local imports so that imports only get done when really needed.</span>
     <span class="kn">import</span> <span class="nn">os</span>
+    <span class="kn">import</span> <span class="nn">sys</span>
+    <span class="kn">import</span> <span class="nn">subprocess</span>
     <span class="kn">import</span> <span class="nn">inspect</span>
     <span class="kn">import</span> <span class="nn">pytest</span>
     <span class="kn">import</span> <span class="nn">contextlib</span>
@@ -179,6 +181,13 @@
     <span class="n">raise_exception</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;raise_exception&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
     <span class="n">package_from_dir</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;package_from_dir&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
     <span class="n">get_version</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;get_version&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">with_coverage</span> <span class="o">=</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;TESTR_COVERAGE&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;true&#39;</span><span class="p">])</span>
+    <span class="n">coverage_config</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;TESTR_COVERAGE_CONFIG&#39;</span><span class="p">,</span> <span class="s1">&#39;no-coverage-config&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">with_coverage</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">coverage_config</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">raise_exception</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">TestError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Coverage config is not found </span><span class="si">{</span><span class="n">coverage_config</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
 
     <span class="k">if</span> <span class="s1">&#39;TESTR_PYTEST_ARGS&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
         <span class="n">args</span> <span class="o">=</span> <span class="n">args</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;TESTR_PYTEST_ARGS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
@@ -238,12 +247,26 @@
     <span class="n">pkg_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="o">*</span><span class="n">pkg_names</span><span class="p">)</span>
 
     <span class="k">with</span> <span class="n">chdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="o">*</span><span class="n">pkg_paths</span><span class="p">)):</span>
-        <span class="n">n_fail</span> <span class="o">=</span> <span class="n">pytest</span><span class="o">.</span><span class="n">main</span><span class="p">([</span><span class="n">pkg_dir</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">with_coverage</span><span class="p">:</span>
+            <span class="n">coverage_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;TESTR_OUT_DIR&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;.coverage&#39;</span>
+            <span class="p">)</span>
+            <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="s1">&#39;coverage&#39;</span><span class="p">,</span> <span class="s1">&#39;run&#39;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s1">&#39;--rcfile=</span><span class="si">{</span><span class="n">coverage_config</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s1">&#39;--data-file=</span><span class="si">{</span><span class="n">coverage_file</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;-m&#39;</span><span class="p">,</span> <span class="s1">&#39;pytest&#39;</span><span class="p">,</span> <span class="n">pkg_dir</span>
+            <span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">]</span>
+            <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">STDOUT</span><span class="p">)</span>
+            <span class="n">rc</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">returncode</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">rc</span> <span class="o">=</span> <span class="n">pytest</span><span class="o">.</span><span class="n">main</span><span class="p">([</span><span class="n">pkg_dir</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">n_fail</span> <span class="ow">and</span> <span class="n">raise_exception</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">TestError</span><span class="p">(</span><span class="s1">&#39;got </span><span class="si">{}</span><span class="s1"> failure(s)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n_fail</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">rc</span> <span class="ow">and</span> <span class="n">raise_exception</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">TestError</span><span class="p">(</span><span class="s1">&#39;Failed&#39;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">n_fail</span></div>
+    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">rc</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="get_full_version"><a class="viewcode-back" href="../../index.html#testr.runner.get_full_version">[docs]</a><span class="k">def</span> <span class="nf">get_full_version</span><span class="p">(</span><span class="n">calling_frame_globals</span><span class="p">,</span> <span class="n">calling_frame_filename</span><span class="p">):</span>
