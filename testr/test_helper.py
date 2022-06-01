@@ -77,7 +77,7 @@ def on_head_network():
     """
     Return True if the system is apparently on the HEAD network.
 
-    This looks for subnets 52 (e.g. fido, lato) and 184 (kadi) on 131.142.xxx.
+    This looks for subnets 52 (e.g. fido, lato), 184 (kadi), 185 (owen-v) on 131.142.xxx.
     """
     try:
         hostname = socket.gethostname()
@@ -89,7 +89,7 @@ def on_head_network():
         ips = host_ip.split('.')
         out = (ips[0] == '131' and
                ips[1] == '142' and
-               ips[2] in ('52', '184'))  # 60 Garden, CDP respectively
+               ips[2] in ('52', '184', '185'))  # 60 Garden, CDP, CDP
     return out
 
 
