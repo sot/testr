@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>testr &#8212; testr 4.11.0 documentation</title>
+    <title>testr &#8212; testr 4.11.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-astropy.css" />
     
@@ -47,7 +47,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="#">testr 4.11.0 documentation</a>
+	<a href="#">testr 4.11.1 documentation</a>
 	 &#187;
       </li>
       
@@ -768,7 +768,10 @@ and the correct Python shared object library exists on the system.</p>
 <dt class="sig sig-object py" id="testr.test_helper.on_head_network">
 <span class="sig-prename descclassname"><span class="pre">testr.test_helper.</span></span><span class="sig-name descname"><span class="pre">on_head_network</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/testr/test_helper.html#on_head_network"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#testr.test_helper.on_head_network" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return True if the system is apparently on the HEAD network.</p>
-<p>This looks for subnets 52 (e.g. fido, lato), 184 (kadi), 185 (owen-v) on 131.142.xxx.</p>
+<p>This looks for a list of subnets corresponding to linux machines listed
+in the HEAD <cite>nodeinfo</cite> database. Last updated on 2022-08-30. It also
+requires that the path /proj/sot/ska exists (because there are machines
+on those subnets that do not have /proj/sot/ska on their filesystem).</p>
 </dd></dl>
 
 </section>
