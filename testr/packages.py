@@ -193,12 +193,13 @@ def collect_tests():
                     'package_version': version,
                     'coverage': opt.coverage,
                     'coverage_config': opt.coverage_config,
-                    'pytest_ini': opt.root / 'pytest.ini'
                 }
 
-                pkg_pytest_ini = in_dir / 'pytest.ini'
-                if test_file.endswith('.py') and pkg_pytest_ini.exists():
-                    test['pkg_pytest_ini'] = str(pkg_pytest_ini)
+                if test_file.endswith('.py'):
+                    pytest_ini = in_dir / 'pytest.ini'
+                    if not pytest_ini.exists():
+                        pytest_ini = opt.root / 'pytest.ini'
+                    test['pytest_ini'] = pytest_ini
 
                 tests[package].append(test)
 

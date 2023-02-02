@@ -112,11 +112,14 @@ def test(*args, **kwargs):
     # flight directory if tests fail running on installed package.
     args = args + ('-p', 'no:cacheprovider')
 
-    if 'TESTR_PKG_PYTEST_INI' in os.environ:
-        args += ('-c', os.environ['TESTR_PKG_PYTEST_INI'])
-    else:
-        args += ('-c', os.environ['TESTR_PYTEST_INI'])
-
+    pytest_ini = os.environ.get('TESTR_PYTEST_INI', None)
+    if pytest_ini is not None:
+        if os.path.exists(pytest_ini):
+            args += ('-c', os.path.abspath(pytest_ini))
+        else:
+            raise Exception(
+                f'Pytest config file does not exist (TESTR_PYTEST_INI={pytest_ini})'
+            )
 
     if 'TESTR_ALLOW_HYPOTHESIS' not in os.environ:
         # Disable autoload of hypothesis plugin which causes warnings due to
