@@ -182,16 +182,25 @@ def collect_tests():
                 else:
                     interpreter = None
 
-                test = {'file': test_file,
-                        'status': status,
-                        'interpreter': interpreter,
-                        'out_dir': out_dir,
-                        'regress_dir': regress_dir,
-                        'packages_repo': opt.packages_repo,
-                        'package': package,
-                        'package_version': version,
-                        'coverage': opt.coverage,
-                        'coverage_config': opt.coverage_config}
+                test = {
+                    'file': test_file,
+                    'status': status,
+                    'interpreter': interpreter,
+                    'out_dir': out_dir,
+                    'regress_dir': regress_dir,
+                    'packages_repo': opt.packages_repo,
+                    'package': package,
+                    'package_version': version,
+                    'coverage': opt.coverage,
+                    'coverage_config': opt.coverage_config,
+                }
+
+                if test_file.endswith('.py'):
+                    pytest_ini = in_dir / 'pytest.ini'
+                    if not pytest_ini.exists():
+                        pytest_ini = opt.root / 'pytest.ini'
+                    if pytest_ini.exists():
+                        test['pytest_ini'] = pytest_ini
 
                 tests[package].append(test)
 

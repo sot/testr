@@ -7,37 +7,6 @@ Provide a test() function that can be called from package __init__.
 import os
 
 
-# Pytest args for main() to ignore several warnings that show up regularly in
-# testing but can be ignored.
-PYTEST_IGNORE_WARNINGS = (
-    # See https://github.com/numpy/numpy/issues/11788 for why the numpy.ufunc
-    # warning is apparently OK.
-    '-Wignore:numpy.ufunc size changed:RuntimeWarning',
-
-    # Shows up in upstream packages including ipyparallel
-    '-Wignore:the imp module is deprecated in favour of importlib:DeprecationWarning',
-
-    # Shows up in setuptools_scm
-    '-Wignore:parse functions are required to provide a named:PendingDeprecationWarning',
-
-    # Shows up in sparkles from importing bleach
-    '-Wignore:Using or importing the ABCs:DeprecationWarning',
-
-    # Shows up in several places from importing PyTables
-    '-Wignore:`np.object` is a deprecated alias for the builtin `object`',
-
-    # This warning comes about when running with the latest version MarksupSafe (>=2.0) but an old
-    # version of Jinja2<3.0.
-    "-Wignore: 'soft_unicode' has been renamed to 'soft_str'",
-
-    # annie/telem.py:18
-    #  (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes)
-    # is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the
-    # ndarray.
-    "-Wignore:  Creating an ndarray from ragged nested sequences",
-)
-
-
 class TestError(Exception):
     pass
 
@@ -134,8 +103,6 @@ def test(*args, **kwargs):
     if kwargs.pop('show_output', False) and '-s' not in args and '--capture' not in arg_names:
         args = args + ('-s',)
 
-    args = args + PYTEST_IGNORE_WARNINGS
-
     if 'TESTR_OUT_DIR' in os.environ and 'TESTR_FILE' in os.environ:
         report_file = os.path.join(os.environ['TESTR_OUT_DIR'], f"{os.environ['TESTR_FILE']}.xml")
         args += (f'--junit-xml={report_file}',)
@@ -144,6 +111,15 @@ def test(*args, **kwargs):
     # Disable caching of test results to prevent users trying to write into
     # flight directory if tests fail running on installed package.
     args = args + ('-p', 'no:cacheprovider')
+
+    pytest_ini = os.environ.get('TESTR_PYTEST_INI', None)
+    if pytest_ini is not None:
+        if os.path.exists(pytest_ini):
+            args += ('-c', os.path.abspath(pytest_ini))
+        else:
+            raise Exception(
+                f'Pytest config file does not exist (TESTR_PYTEST_INI={pytest_ini})'
+            )
 
     if 'TESTR_ALLOW_HYPOTHESIS' not in os.environ:
         # Disable autoload of hypothesis plugin which causes warnings due to
