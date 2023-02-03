@@ -199,7 +199,8 @@ def collect_tests():
                     pytest_ini = in_dir / 'pytest.ini'
                     if not pytest_ini.exists():
                         pytest_ini = opt.root / 'pytest.ini'
-                    test['pytest_ini'] = pytest_ini
+                    if pytest_ini.exists():
+                        test['pytest_ini'] = pytest_ini
 
                 tests[package].append(test)
 
