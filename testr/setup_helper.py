@@ -25,9 +25,8 @@ class PyTest(TestCommand):
         # Import here because outside the eggs aren't loaded
         import pytest
         import shlex
-        from .runner import PYTEST_IGNORE_WARNINGS
 
-        args = list(PYTEST_IGNORE_WARNINGS)
+        args = []
         if self.args:
             args += shlex.split(self.args)
         errno = pytest.main(args)
