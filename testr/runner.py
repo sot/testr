@@ -7,6 +7,24 @@ Provide a test() function that can be called from package __init__.
 import os
 
 
+# Make a class to wrap sys.stdout to handle requests for isatty.  This is needed
+# to get the right output from pytest when run from FOT MATLAB pyexec.
+# Borrowed from https://github.com/pytest-dev/pytest/issues/5462
+class StdOutWrapper:
+
+    def __init__(self, stdout):
+        self._stdout = stdout
+
+    def __getattr__(self, item):
+        if item == "isatty":
+            return self.isatty
+        else:
+            return getattr(self._stdout, item)
+
+    def isatty(self):
+        return False
+
+
 class TestError(Exception):
     pass
 
@@ -64,6 +82,9 @@ def test(*args, **kwargs):
     import inspect
     import pytest
     import contextlib
+
+    # Use the StdOutWrapper to make sure that isatty returns something for sys.stdout
+    sys.stdout = StdOutWrapper(sys.stdout)
 
     # Copied from Ska.File to reduce import footprint and limit to only standard
     # modules.
