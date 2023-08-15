@@ -16,10 +16,7 @@ class StdOutWrapper:
         self._stdout = stdout
 
     def __getattr__(self, item):
-        if item == "isatty":
-            return self.isatty
-        else:
-            return getattr(self._stdout, item)
+        return getattr(self._stdout, item)
 
     def isatty(self):
         return False
