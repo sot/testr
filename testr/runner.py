@@ -22,19 +22,6 @@ class StdOutWrapper:
         return False
 
 
-def stdout_wrapper(func):
-    import sys
-
-    def test_wrapper(*args, **kwargs):
-        orig_stdout = sys.stdout
-        sys.stdout = StdOutWrapper(sys.stdout)
-        try:
-            func(*args, **kwargs)
-        finally:
-            sys.stdout = orig_stdout
-    return test_wrapper
-
-
 class TestError(Exception):
     pass
 
@@ -59,12 +46,11 @@ def testr(*args, **kwargs):
 
     # test() function looks up the calling stack to find the calling package name.
     # It will be three levels up including the stdout_wrapper test_wrapper function.
-    kwargs['stack_level'] = 3
+    kwargs['stack_level'] = 2
 
     return test(*args, **kwargs)
 
 
-@stdout_wrapper
 def test(*args, **kwargs):
     r"""
     Run py.test unit tests for the calling package with specified
@@ -112,6 +98,18 @@ def test(*args, **kwargs):
         finally:
             os.chdir(curdir)
 
+    @contextlib.contextmanager
+    def stdout_context():
+        """
+        Context manager to temporarily replace sys.stdout with StdOutWrapper
+        """
+        orig_stdout = sys.stdout
+        sys.stdout = StdOutWrapper(sys.stdout)
+        try:
+            yield
+        finally:
+            sys.stdout = orig_stdout
+
     raise_exception = kwargs.pop('raise_exception', False)
     package_from_dir = kwargs.pop('package_from_dir', False)
     get_version = kwargs.pop('get_version', False)
@@ -158,7 +156,7 @@ def test(*args, **kwargs):
         args += ('-p', 'no:hypothesispytest')  # current name for disabling
         args += ('-p', 'no:hypothesis')  # possible future name
 
-    stack_level = kwargs.pop('stack_level', 2)
+    stack_level = kwargs.pop('stack_level', 1)
     calling_frame_record = inspect.stack()[stack_level]  # Only works for stack-based Python
     calling_func_file = calling_frame_record[1]
 
@@ -199,10 +197,12 @@ def test(*args, **kwargs):
                 f'--data-file={coverage_file}',
                 '-m', 'pytest', pkg_dir
             ] + list(args) + [f'{k}={v}' for k, v in kwargs]
-            process = subprocess.run(cmd, stdout=sys.stdout, stderr=subprocess.STDOUT)
+            with stdout_context():
+                process = subprocess.run(cmd, stdout=sys.stdout, stderr=subprocess.STDOUT)
             rc = process.returncode
         else:
-            rc = pytest.main([pkg_dir] + list(args), **kwargs)
+            with stdout_context():
+                rc = pytest.main([pkg_dir] + list(args), **kwargs)
 
     if rc and raise_exception:
         raise TestError('Failed')
