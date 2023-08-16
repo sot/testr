@@ -24,6 +24,7 @@ class StdOutWrapper:
 
 def stdout_wrapper(func):
     import sys
+
     def test_wrapper(*args, **kwargs):
         orig_stdout = sys.stdout
         sys.stdout = StdOutWrapper(sys.stdout)
@@ -32,6 +33,7 @@ def stdout_wrapper(func):
         finally:
             sys.stdout = orig_stdout
     return test_wrapper
+
 
 class TestError(Exception):
     pass
