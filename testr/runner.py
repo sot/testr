@@ -22,6 +22,17 @@ class StdOutWrapper:
         return False
 
 
+def stdout_wrapper(func):
+    import sys
+    def test_wrapper(*args, **kwargs):
+        orig_stdout = sys.stdout
+        sys.stdout = StdOutWrapper(sys.stdout)
+        try:
+            func(*args, **kwargs)
+        finally:
+            sys.stdout = orig_stdout
+    return test_wrapper
+
 class TestError(Exception):
     pass
 
@@ -45,12 +56,13 @@ def testr(*args, **kwargs):
         kwargs.setdefault(kwarg, True)
 
     # test() function looks up the calling stack to find the calling package name.
-    # It will be two levels up.
-    kwargs['stack_level'] = 2
+    # It will be three levels up including the stdout_wrapper test_wrapper function.
+    kwargs['stack_level'] = 3
 
     return test(*args, **kwargs)
 
 
+@stdout_wrapper
 def test(*args, **kwargs):
     r"""
     Run py.test unit tests for the calling package with specified
@@ -79,9 +91,6 @@ def test(*args, **kwargs):
     import inspect
     import pytest
     import contextlib
-
-    # Use the StdOutWrapper to make sure that isatty returns something for sys.stdout
-    sys.stdout = StdOutWrapper(sys.stdout)
 
     # Copied from Ska.File to reduce import footprint and limit to only standard
     # modules.
@@ -147,7 +156,7 @@ def test(*args, **kwargs):
         args += ('-p', 'no:hypothesispytest')  # current name for disabling
         args += ('-p', 'no:hypothesis')  # possible future name
 
-    stack_level = kwargs.pop('stack_level', 1)
+    stack_level = kwargs.pop('stack_level', 2)
     calling_frame_record = inspect.stack()[stack_level]  # Only works for stack-based Python
     calling_func_file = calling_frame_record[1]
 
