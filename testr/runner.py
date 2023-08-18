@@ -45,7 +45,7 @@ def testr(*args, **kwargs):
         kwargs.setdefault(kwarg, True)
 
     # test() function looks up the calling stack to find the calling package name.
-    # It will be three levels up including the stdout_wrapper test_wrapper function.
+    # It will be two levels up.
     kwargs['stack_level'] = 2
 
     return test(*args, **kwargs)
