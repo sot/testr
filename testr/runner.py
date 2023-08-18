@@ -80,9 +80,6 @@ def test(*args, **kwargs):
     import pytest
     import contextlib
 
-    # Use the StdOutWrapper to make sure that isatty returns something for sys.stdout
-    sys.stdout = StdOutWrapper(sys.stdout)
-
     # Copied from Ska.File to reduce import footprint and limit to only standard
     # modules.
     @contextlib.contextmanager
@@ -100,6 +97,18 @@ def test(*args, **kwargs):
             yield
         finally:
             os.chdir(curdir)
+
+    @contextlib.contextmanager
+    def stdout_context():
+        """
+        Context manager to temporarily replace sys.stdout with StdOutWrapper
+        """
+        orig_stdout = sys.stdout
+        sys.stdout = StdOutWrapper(sys.stdout)
+        try:
+            yield
+        finally:
+            sys.stdout = orig_stdout
 
     raise_exception = kwargs.pop('raise_exception', False)
     package_from_dir = kwargs.pop('package_from_dir', False)
@@ -188,10 +197,12 @@ def test(*args, **kwargs):
                 f'--data-file={coverage_file}',
                 '-m', 'pytest', pkg_dir
             ] + list(args) + [f'{k}={v}' for k, v in kwargs]
-            process = subprocess.run(cmd, stdout=sys.stdout, stderr=subprocess.STDOUT)
+            with stdout_context():
+                process = subprocess.run(cmd, stdout=sys.stdout, stderr=subprocess.STDOUT)
             rc = process.returncode
         else:
-            rc = pytest.main([pkg_dir] + list(args), **kwargs)
+            with stdout_context():
+                rc = pytest.main([pkg_dir] + list(args), **kwargs)
 
     if rc and raise_exception:
         raise TestError('Failed')
