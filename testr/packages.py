@@ -570,8 +570,10 @@ def write_log(tests, include_stdout=False):
                     if ts['properties']['t_start'] is not None]
         test_suites['run_info']['t_stop'] = min(t_stops) if t_stops else None
         test_suites['run_info']['t_start'] = min(t_starts) if t_starts else None
+        # the following collects architecture, hostname, system, and platform of all the test suites
+        # but by construction, all these should be single values
         test_suites['run_info'].update({
-            k: sorted(set([ts['properties'][k] for ts in all_test_suites]))
+            k: ', '.join(sorted(set([ts['properties'][k] for ts in all_test_suites])))
             for k in ['architecture', 'hostname', 'system', 'platform']
         })
         test_suites['test_suites'] = all_test_suites
