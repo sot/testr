@@ -68,7 +68,9 @@ def test(*args, **kwargs):
     :param package_from_dir: set package name from parent directory name (default=False)
     :param verbose: run pytest in verbose (-v) mode (default=False)
     :param show_output: run pytest in show output (-s) mode (default=False)
-    :param \*\*kwargs: additional keyword args to pass to pytest
+    :param \*\*kwargs: additional command line options to pass to pytest, where the
+        key is the option name (e.g. "--log-level") and the value is the option value.
+        This is passed to the pytest CLI as the string ``{key}={value}``.
 
     :returns: number of test failures
     """
@@ -193,7 +195,8 @@ def test(*args, **kwargs):
     # summary pytest > 8.0.0 uses the location of a pytest.ini file to set the rootdir
     # unless it is explicitly specified. This is generally NOT what we want.
     rootdir = os.path.abspath(os.path.join(*pkg_paths))
-    kwargs.setdefault('rootdir', rootdir)
+    kwargs.setdefault('--rootdir', rootdir)
+    args += tuple([f'{k}={v}' for k, v in kwargs.items()])
 
     with chdir(rootdir):
         if with_coverage:
@@ -206,13 +209,13 @@ def test(*args, **kwargs):
                 f'--rcfile={coverage_config}',
                 f'--data-file={coverage_file}',
                 '-m', 'pytest', pkg_dir
-            ] + list(args) + [f'{k}={v}' for k, v in kwargs]
+            ] + list(args)
             with stdout_context():
                 process = subprocess.run(cmd, stdout=sys.stdout, stderr=subprocess.STDOUT)
             rc = process.returncode
         else:
             with stdout_context():
-                rc = pytest.main([pkg_dir] + list(args), **kwargs)
+                rc = pytest.main([pkg_dir] + list(args))
 
     if rc and raise_exception:
         raise TestError('Failed')
