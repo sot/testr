@@ -185,6 +185,9 @@ def test(*args, **kwargs):
     pkg_paths = [os.path.dirname(calling_func_file)] + ['..'] * len(pkg_names)
     pkg_dir = os.path.join(*pkg_names)
 
+    # Set rootdir to the pkg_dir
+    args = args + ('--rootdir', pkg_dir)
+
     with chdir(os.path.join(*pkg_paths)):
         if with_coverage:
             coverage_file = os.path.join(
