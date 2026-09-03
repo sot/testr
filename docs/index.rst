@@ -450,7 +450,7 @@ The log is written in JSON format and looks something like the following:
           {
             "name": "post_check_logs.py",
             "file": "Quaternion/post_check_logs.py",
-            "timestamp": "2020:06:16T09:43:13",
+            "timestamp": "2020-06-16T09:43:13",
             "log": "Quaternion/post_check_logs.py.log",
             "status": "fail",
             "failure": {
@@ -459,7 +459,7 @@ The log is written in JSON format and looks something like the following:
             }
           }
         ],
-        "timestamp": "2020:06:16T09:43:13",
+        "timestamp": "2020-06-16T09:43:13",
         "properties": {
           "system": "Darwin",
           "architecture": "64bit",
@@ -467,8 +467,8 @@ The log is written in JSON format and looks something like the following:
           "platform": "Darwin-19.5.0",
           "package": "Quaternion",
           "package_version": "3.5.2.dev9+g7ee8b10.d20200616",
-          "t_start": "2020:06:16T09:43:13",
-          "t_stop": "2020:06:16T09:43:14",
+          "t_start": "2020-06-16T09:43:13",
+          "t_stop": "2020-06-16T09:43:14",
           "regress_dir": null,
           "out_dir": "Quaternion"
         }
@@ -514,14 +514,14 @@ The log is written in JSON format and looks something like the following:
             "platform": "Darwin-19.5.0",
             "package": "Quaternion",
             "package_version": "3.5.2.dev9+g7ee8b10.d20200616",
-            "t_start": "2020:06:16T09:43:11",
-            "t_stop": "2020:06:16T09:43:13",
+            "t_start": "2020-06-16T09:43:11",
+            "t_stop": "2020-06-16T09:43:13",
             "regress_dir": null,
             "out_dir": "Quaternion"
           },
           "log": "Quaternion/test_unit.py.log",
           "hostname": "saos-MacBook-Pro.local",
-          "timestamp": "2020:06:16T09:43:11",
+          "timestamp": "2020-06-16T09:43:11",
           "package": "Quaternion",
           "file": "Quaternion/test_unit.py"
         }

@@ -12,7 +12,6 @@ from pathlib import Path
 from xml.dom import minidom
 import collections
 import json
-import datetime
 import platform
 import yaml
 
@@ -138,6 +137,19 @@ def box_output(lines, min_width=40):
         logger.info(fmt.format(line))
     logger.info('*' * width)
     logger.info('')
+
+
+def _timestamp():
+    """
+    The current time as ISO 8601 UTC with second precision.
+
+    These timestamps end up in all_tests.json (including its JUnit-style
+    "timestamp" fields), which is read by other tools, so the format is a
+    standard one that CxoTime also parses.
+    """
+    now = CxoTime.now()
+    now.precision = 0
+    return now.isot
 
 
 def include_test_file(package, test_file):
@@ -302,7 +314,7 @@ def run_tests(package, tests):
             # cmd is the actual bash lines as a single string.  In this way each one
             # gets echoed and run so that an intermediate failure is caught.  For
             # no interpreter assume the file is executable.
-            test['t_start'] = datetime.datetime.now().strftime('%Y:%m:%dT%H:%M:%S')
+            test['t_start'] = _timestamp()
 
             # Need full environment in the subprocess run
             env.update(os.environ)
@@ -334,7 +346,7 @@ def run_tests(package, tests):
                     test_ok = (process is not None) and (process.returncode == 0)
                     test['status'] = 'pass' if test_ok else 'FAIL'
 
-            test['t_stop'] = datetime.datetime.now().strftime('%Y:%m:%dT%H:%M:%S')
+            test['t_stop'] = _timestamp()
 
     box_output(
         ['{} Test Summary'.format(package)]
@@ -557,7 +569,7 @@ def write_log(tests, include_stdout=False):
         ska_version = 'None'
     test_suites = {
         'run_info': {
-            'date': datetime.datetime.now().strftime('%Y:%m:%dT%H:%M:%S'),
+            'date': _timestamp(),
             'argv': sys.argv,
             'ska_version': ska_version,
             'test_spec': opt.test_spec.name if opt.test_spec else 'None'
@@ -695,10 +707,7 @@ def get_version_id():
     hostname = platform.uname().node
     cmds = ['python', Path(sys.prefix, 'bin', 'ska_version')]
     version = subprocess.check_output(cmds).decode('ascii').strip()
-    time = CxoTime.now()
-    time.format = 'isot'
-    time.precision = 0
-    version_id = f'{platform.system()}_{time}_{version}_{hostname}'
+    version_id = f'{platform.system()}_{_timestamp()}_{version}_{hostname}'
     # Colon in file name is bad for Windows and also fails cheta long regress test
     version_id = version_id.replace(':', '-')
     return version_id
