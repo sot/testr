@@ -4,13 +4,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>testr.runner &#8212; testr 4.13.0 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <title>testr.runner &#8212; testr 4.14.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-astropy.css?v=f4f7060c" />
     
-    <script src="../../_static/documentation_options.js?v=0080a303"></script>
-    <script src="../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/documentation_options.js?v=8edb52cd"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script type="text/javascript" src="../../_static/sidebar.js"></script>
     <script type="text/javascript" src="../../_static/copybutton.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -44,7 +44,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="../../index.html">testr 4.13.0 documentation</a>
+	<a href="../../index.html">testr 4.14.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
@@ -66,34 +66,34 @@
 <span class="sd">Provide a test() function that can be called from package __init__.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
 
 <span class="c1"># Make a class to wrap sys.stdout to handle requests for isatty.  This is needed</span>
 <span class="c1"># to get the right output from pytest when run from FOT MATLAB pyexec.</span>
 <span class="c1"># Borrowed from https://github.com/pytest-dev/pytest/issues/5462</span>
-<span class="k">class</span> <span class="nc">StdOutWrapper</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">StdOutWrapper</span><span class="p">:</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stdout</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stdout</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_stdout</span> <span class="o">=</span> <span class="n">stdout</span>
 
-    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stdout</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">isatty</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">isatty</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">False</span>
 
 
 <div class="viewcode-block" id="TestError">
 <a class="viewcode-back" href="../../index.html#testr.runner.TestError">[docs]</a>
-<span class="k">class</span> <span class="nc">TestError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TestError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
     <span class="k">pass</span></div>
 
 
 
 <div class="viewcode-block" id="testr">
 <a class="viewcode-back" href="../../index.html#testr.runner.testr">[docs]</a>
-<span class="k">def</span> <span class="nf">testr</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">testr</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Run py.test unit tests for the calling package.  This just calls the ``test()``</span>
 <span class="sd">    function but includes defaults that are more appropriate for integrated package</span>
@@ -121,7 +121,7 @@
 
 <div class="viewcode-block" id="test">
 <a class="viewcode-back" href="../../index.html#testr.runner.test">[docs]</a>
-<span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Run py.test unit tests for the calling package with specified</span>
 <span class="sd">    ``args`` and ``kwargs``.</span>
@@ -145,17 +145,17 @@
 <span class="sd">    :returns: number of test failures</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Local imports so that imports only get done when really needed.</span>
-    <span class="kn">import</span> <span class="nn">os</span>
-    <span class="kn">import</span> <span class="nn">sys</span>
-    <span class="kn">import</span> <span class="nn">subprocess</span>
-    <span class="kn">import</span> <span class="nn">inspect</span>
-    <span class="kn">import</span> <span class="nn">pytest</span>
-    <span class="kn">import</span> <span class="nn">contextlib</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
 
     <span class="c1"># Copied from Ska.File to reduce import footprint and limit to only standard</span>
     <span class="c1"># modules.</span>
     <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
-    <span class="k">def</span> <span class="nf">chdir</span><span class="p">(</span><span class="n">dirname</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">chdir</span><span class="p">(</span><span class="n">dirname</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Context manager to run block within `dirname` directory.  The current</span>
 <span class="sd">        directory is restored even if the block raises an exception.</span>
@@ -171,7 +171,7 @@
             <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">curdir</span><span class="p">)</span>
 
     <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
-    <span class="k">def</span> <span class="nf">stdout_context</span><span class="p">():</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stdout_context</span><span class="p">():</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Context manager to temporarily replace sys.stdout with StdOutWrapper</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -237,7 +237,7 @@
         <span class="c1"># located in a directory named by the package that is to be tested.  I.e.</span>
         <span class="c1"># chandra_aca/test.py.  However, this is NOT the actual package directory</span>
         <span class="c1"># so we have to import the package to get its parent directory.</span>
-        <span class="kn">import</span> <span class="nn">importlib</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">importlib</span>
         <span class="n">package</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">calling_func_file</span><span class="p">)))</span>
         <span class="n">module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">package</span><span class="p">)</span>
         <span class="n">calling_func_file</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="vm">__file__</span>
@@ -296,7 +296,7 @@
 
 <div class="viewcode-block" id="get_full_version">
 <a class="viewcode-back" href="../../index.html#testr.runner.get_full_version">[docs]</a>
-<span class="k">def</span> <span class="nf">get_full_version</span><span class="p">(</span><span class="n">calling_frame_globals</span><span class="p">,</span> <span class="n">calling_frame_filename</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_full_version</span><span class="p">(</span><span class="n">calling_frame_globals</span><span class="p">,</span> <span class="n">calling_frame_filename</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a full version which includes git info if the module was imported</span>
 <span class="sd">    from the git repo source directory.</span>
@@ -304,7 +304,7 @@
     <span class="n">release_version</span> <span class="o">=</span> <span class="n">calling_frame_globals</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;__version__&#39;</span><span class="p">,</span> <span class="s1">&#39;unknown&#39;</span><span class="p">)</span>
 
     <span class="k">try</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">subprocess</span> <span class="kn">import</span> <span class="n">Popen</span><span class="p">,</span> <span class="n">PIPE</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">subprocess</span><span class="w"> </span><span class="kn">import</span> <span class="n">Popen</span><span class="p">,</span> <span class="n">PIPE</span>
         <span class="n">filedir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">calling_frame_filename</span><span class="p">))</span>
 
         <span class="n">p</span> <span class="o">=</span> <span class="n">Popen</span><span class="p">([</span><span class="s1">&#39;git&#39;</span><span class="p">,</span> <span class="s1">&#39;rev-list&#39;</span><span class="p">,</span> <span class="s1">&#39;HEAD&#39;</span><span class="p">],</span>
@@ -347,7 +347,7 @@
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2016, Tom Aldcroft.<br/>
-    Created using <a href="http://www.sphinx-doc.org/en/stable/">Sphinx</a> 8.1.3. &nbsp;
+    Created using <a href="http://www.sphinx-doc.org/en/stable/">Sphinx</a> 9.1.0. &nbsp;
   </p>
 </footer>
   </body>

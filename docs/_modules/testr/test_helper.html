@@ -4,13 +4,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>testr.test_helper &#8212; testr 4.13.0 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <title>testr.test_helper &#8212; testr 4.14.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-astropy.css?v=f4f7060c" />
     
-    <script src="../../_static/documentation_options.js?v=0080a303"></script>
-    <script src="../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/documentation_options.js?v=8edb52cd"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script type="text/javascript" src="../../_static/sidebar.js"></script>
     <script type="text/javascript" src="../../_static/copybutton.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -44,7 +44,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="../../index.html">testr 4.13.0 documentation</a>
+	<a href="../../index.html">testr 4.14.0 documentation</a>
 	 &#187;
       </li>
       <li><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
@@ -65,11 +65,11 @@
 <span class="sd">Provide helper functions that are useful for unit testing.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">platform</span>
-<span class="kn">import</span> <span class="nn">socket</span>
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">platform</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">socket</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;has_paths&#39;</span><span class="p">,</span> <span class="s1">&#39;has_dirs&#39;</span><span class="p">,</span> <span class="s1">&#39;has_sybase&#39;</span><span class="p">,</span> <span class="s1">&#39;on_head_network&#39;</span><span class="p">,</span> <span class="s1">&#39;is_32_bit&#39;</span><span class="p">,</span>
            <span class="s1">&#39;is_windows&#39;</span><span class="p">,</span> <span class="s1">&#39;is_mac&#39;</span><span class="p">,</span> <span class="s1">&#39;is_linux&#39;</span><span class="p">]</span>
@@ -77,7 +77,7 @@
 
 <div class="viewcode-block" id="has_paths">
 <a class="viewcode-back" href="../../index.html#testr.test_helper.has_paths">[docs]</a>
-<span class="k">def</span> <span class="nf">has_paths</span><span class="p">(</span><span class="o">*</span><span class="n">paths</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">has_paths</span><span class="p">(</span><span class="o">*</span><span class="n">paths</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;All of the ``paths`` exist</span>
 
 <span class="sd">    Input path(s) can contain ~ (home dir) or environment variables like $SKA or</span>
@@ -94,7 +94,7 @@
 
 <div class="viewcode-block" id="has_dirs">
 <a class="viewcode-back" href="../../index.html#testr.test_helper.has_dirs">[docs]</a>
-<span class="k">def</span> <span class="nf">has_dirs</span><span class="p">(</span><span class="o">*</span><span class="n">paths</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">has_dirs</span><span class="p">(</span><span class="o">*</span><span class="n">paths</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;All of the ``paths`` exist and each is a directory</span>
 
 <span class="sd">    Input path(s) can contain ~ (home dir) or environment variables like $SKA or</span>
@@ -109,21 +109,21 @@
 
 
 
-<span class="k">def</span> <span class="nf">is_windows</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_windows</span><span class="p">():</span>
     <span class="k">return</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;Windows&#39;</span>
 
 
-<span class="k">def</span> <span class="nf">is_mac</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_mac</span><span class="p">():</span>
     <span class="k">return</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;Darwin&#39;</span>
 
 
-<span class="k">def</span> <span class="nf">is_linux</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_linux</span><span class="p">():</span>
     <span class="k">return</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;Linux&#39;</span>
 
 
 <div class="viewcode-block" id="has_sybase">
 <a class="viewcode-back" href="../../index.html#testr.test_helper.has_sybase">[docs]</a>
-<span class="k">def</span> <span class="nf">has_sybase</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">has_sybase</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return True if the system apparently can run Sybase queries from Python.</span>
 
@@ -146,7 +146,7 @@
 
 <div class="viewcode-block" id="on_head_network">
 <a class="viewcode-back" href="../../index.html#testr.test_helper.on_head_network">[docs]</a>
-<span class="k">def</span> <span class="nf">on_head_network</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">on_head_network</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return True if the system is apparently on the HEAD network.</span>
 
@@ -158,7 +158,7 @@
     <span class="c1"># Generated by utils/get_head_subnets.py</span>
     <span class="n">head_subnets</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span>
         <span class="p">[</span>
-            <span class="s1">&#39;9&#39;</span><span class="p">,</span> <span class="s1">&#39;18&#39;</span><span class="p">,</span> <span class="s1">&#39;40&#39;</span><span class="p">,</span> <span class="s1">&#39;41&#39;</span><span class="p">,</span> <span class="s1">&#39;42&#39;</span><span class="p">,</span> <span class="s1">&#39;43&#39;</span><span class="p">,</span> <span class="s1">&#39;45&#39;</span><span class="p">,</span> <span class="s1">&#39;46&#39;</span><span class="p">,</span> <span class="s1">&#39;47&#39;</span><span class="p">,</span> <span class="s1">&#39;48&#39;</span><span class="p">,</span> <span class="s1">&#39;51&#39;</span><span class="p">,</span> <span class="s1">&#39;52&#39;</span><span class="p">,</span> <span class="s1">&#39;56&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;9&#39;</span><span class="p">,</span> <span class="s1">&#39;18&#39;</span><span class="p">,</span> <span class="s1">&#39;40&#39;</span><span class="p">,</span> <span class="s1">&#39;41&#39;</span><span class="p">,</span> <span class="s1">&#39;42&#39;</span><span class="p">,</span> <span class="s1">&#39;43&#39;</span><span class="p">,</span> <span class="s1">&#39;45&#39;</span><span class="p">,</span> <span class="s1">&#39;46&#39;</span><span class="p">,</span> <span class="s1">&#39;47&#39;</span><span class="p">,</span> <span class="s1">&#39;48&#39;</span><span class="p">,</span> <span class="s1">&#39;51&#39;</span><span class="p">,</span> <span class="s1">&#39;52&#39;</span><span class="p">,</span> <span class="s1">&#39;56&#39;</span><span class="p">,</span> <span class="s1">&#39;72&#39;</span><span class="p">,</span>
             <span class="s1">&#39;105&#39;</span><span class="p">,</span> <span class="s1">&#39;128&#39;</span><span class="p">,</span> <span class="s1">&#39;152&#39;</span><span class="p">,</span> <span class="s1">&#39;156&#39;</span><span class="p">,</span> <span class="s1">&#39;157&#39;</span><span class="p">,</span> <span class="s1">&#39;184&#39;</span><span class="p">,</span> <span class="s1">&#39;185&#39;</span><span class="p">,</span> <span class="s1">&#39;192&#39;</span><span class="p">,</span> <span class="s1">&#39;197&#39;</span><span class="p">,</span> <span class="s1">&#39;198&#39;</span><span class="p">,</span> <span class="s1">&#39;232&#39;</span><span class="p">,</span>
             <span class="s1">&#39;240&#39;</span><span class="p">,</span> <span class="s1">&#39;246&#39;</span>
         <span class="p">]</span>
@@ -180,11 +180,11 @@
 
 
 
-<span class="k">def</span> <span class="nf">is_32_bit</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_32_bit</span><span class="p">():</span>
     <span class="k">return</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span> <span class="o">&lt;=</span> <span class="mi">2</span> <span class="o">**</span> <span class="mi">32</span>
 
 
-<span class="k">def</span> <span class="nf">has_internet</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s1">&#39;https://google.com&#39;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">has_internet</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s1">&#39;https://google.com&#39;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return True if internet is available by trying to get ``url``.</span>
 
 <span class="sd">    Note that using sockets and https://stackoverflow.com/questions/3764291 has</span>
@@ -205,7 +205,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    has_internet : bool</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">import</span> <span class="nn">urllib.request</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">urllib.request</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">True</span>
@@ -235,7 +235,7 @@
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2016, Tom Aldcroft.<br/>
-    Created using <a href="http://www.sphinx-doc.org/en/stable/">Sphinx</a> 8.1.3. &nbsp;
+    Created using <a href="http://www.sphinx-doc.org/en/stable/">Sphinx</a> 9.1.0. &nbsp;
   </p>
 </footer>
   </body>

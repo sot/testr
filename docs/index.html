@@ -5,13 +5,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>testr &#8212; testr 4.13.0 documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <title>testr &#8212; testr 4.14.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-astropy.css?v=f4f7060c" />
     
-    <script src="_static/documentation_options.js?v=0080a303"></script>
-    <script src="_static/doctools.js?v=9bcbadda"></script>
-    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/documentation_options.js?v=8edb52cd"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script type="text/javascript" src="_static/sidebar.js"></script>
     <script type="text/javascript" src="_static/copybutton.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -45,7 +45,7 @@
     <h3>Navigation</h3>
     <ul>
       <li>
-	<a href="#">testr 4.13.0 documentation</a>
+	<a href="#">testr 4.14.0 documentation</a>
 	 &#187;
       </li>
       
@@ -386,7 +386,7 @@ illustrate some useful recipes or idioms.</p>
 <h4>test_unit.py<a class="headerlink" href="#test-unit-py" title="Link to this heading">¶</a></h4>
 <p>Python packages that have built-in (inline) unit tests (see <a class="reference internal" href="#python-testing-helpers">Python testing helpers</a>)
 can be tested with the following:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">testr</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">testr</span>
 <span class="n">testr</span><span class="o">.</span><span class="n">testr</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -395,7 +395,7 @@ it provides flags to run in verbose mode with all test code output copied
 to the console.  This allows any stray warnings to be emitted.</p>
 <p>You can do the same thing without using the <code class="docutils literal notranslate"><span class="pre">testr.testr()</span></code> function as follows.
 The important thing is to raise an exception if there were test failures:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">xija</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">xija</span>
 <span class="n">n_fail</span> <span class="o">=</span> <span class="n">xija</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="s1">&#39;-v&#39;</span><span class="p">,</span> <span class="s1">&#39;-s&#39;</span><span class="p">,</span> <span class="s1">&#39;-k not test_minusz&#39;</span><span class="p">)</span>
 <span class="k">if</span> <span class="n">n_fail</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">n_fail</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; test failures&#39;</span><span class="p">)</span>
@@ -420,7 +420,7 @@ running test code.</p>
 <p>Here is an example from the Ska <a class="reference external" href="https://github.com/sot/ska_testr/tree/master/packages/dpa_check">dpa_check test</a> that copies a few
 key outputs into the <code class="docutils literal notranslate"><span class="pre">regress</span></code> directory after stripping out the
 user name and run time.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">testr.packages</span> <span class="kn">import</span> <span class="n">make_regress_files</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">testr.packages</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_regress_files</span>
 
 <span class="n">regress_files</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;out/index.rst&#39;</span><span class="p">,</span>
                  <span class="s1">&#39;out/run.dat&#39;</span><span class="p">,</span>
@@ -441,7 +441,7 @@ test processing log files for any occurrences of <code class="docutils literal n
 In this case there are a couple of lines where this is expected, so those
 matches are ignored.  Any other matches will raise an exception and signal
 a FAIL for this package:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">testr.packages</span> <span class="kn">import</span> <span class="n">check_files</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">testr.packages</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_files</span>
 
 <span class="n">check_files</span><span class="p">(</span><span class="s1">&#39;test_*.log&#39;</span><span class="p">,</span>
             <span class="n">checks</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;warning&#39;</span><span class="p">,</span> <span class="s1">&#39;error&#39;</span><span class="p">],</span>
@@ -498,7 +498,7 @@ The log is written in JSON format and looks something like the following:</p>
 <span class="w">      </span><span class="p">{</span>
 <span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;post_check_logs.py&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;file&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Quaternion/post_check_logs.py&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020:06:16T09:43:13&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020-06-16T09:43:13&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;log&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Quaternion/post_check_logs.py.log&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fail&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;failure&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -507,7 +507,7 @@ The log is written in JSON format and looks something like the following:</p>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">      </span><span class="p">}</span>
 <span class="w">    </span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020:06:16T09:43:13&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020-06-16T09:43:13&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">&quot;system&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Darwin&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">&quot;architecture&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;64bit&quot;</span><span class="p">,</span>
@@ -515,8 +515,8 @@ The log is written in JSON format and looks something like the following:</p>
 <span class="w">      </span><span class="nt">&quot;platform&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Darwin-19.5.0&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">&quot;package&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Quaternion&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">&quot;package_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3.5.2.dev9+g7ee8b10.d20200616&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;t_start&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020:06:16T09:43:13&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;t_stop&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020:06:16T09:43:14&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;t_start&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020-06-16T09:43:13&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;t_stop&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020-06-16T09:43:14&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">&quot;regress_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">&quot;out_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Quaternion&quot;</span>
 <span class="w">    </span><span class="p">}</span>
@@ -562,14 +562,14 @@ The log is written in JSON format and looks something like the following:</p>
 <span class="w">        </span><span class="nt">&quot;platform&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Darwin-19.5.0&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;package&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Quaternion&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;package_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3.5.2.dev9+g7ee8b10.d20200616&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;t_start&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020:06:16T09:43:11&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;t_stop&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020:06:16T09:43:13&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;t_start&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020-06-16T09:43:11&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;t_stop&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020-06-16T09:43:13&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;regress_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;out_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Quaternion&quot;</span>
 <span class="w">      </span><span class="p">},</span>
 <span class="w">      </span><span class="nt">&quot;log&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Quaternion/test_unit.py.log&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">&quot;hostname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;saos-MacBook-Pro.local&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020:06:16T09:43:11&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020-06-16T09:43:11&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">&quot;package&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Quaternion&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">&quot;file&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Quaternion/test_unit.py&quot;</span>
 <span class="w">    </span><span class="p">}</span>
@@ -591,11 +591,11 @@ to enable easy and uniform running of pytest test functions in two ways:</p>
 <section id="init-py">
 <h3><code class="docutils literal notranslate"><span class="pre">__init__.py</span></code><a class="headerlink" href="#init-py" title="Link to this heading">¶</a></h3>
 <p>Typical usage within the package <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> file:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Run py.test unit tests.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="kn">import</span> <span class="nn">testr</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">testr</span>
     <span class="k">return</span> <span class="n">testr</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -619,10 +619,10 @@ installed package is working as expected.  See the next section for an example
 <section id="setup-py">
 <h3><code class="docutils literal notranslate"><span class="pre">setup.py</span></code><a class="headerlink" href="#setup-py" title="Link to this heading">¶</a></h3>
 <p>Typical usage in <code class="docutils literal notranslate"><span class="pre">setup.py</span></code>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">setuptools</span> <span class="kn">import</span> <span class="n">setup</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">setuptools</span><span class="w"> </span><span class="kn">import</span> <span class="n">setup</span>
 
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">testr.setup_helper</span> <span class="kn">import</span> <span class="n">cmdclass</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">testr.setup_helper</span><span class="w"> </span><span class="kn">import</span> <span class="n">cmdclass</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="n">cmdclass</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -642,7 +642,7 @@ installed package is working as expected.  See the next section for an example
 <p>Provide a test() function that can be called from package __init__.</p>
 <dl class="py exception">
 <dt class="sig sig-object py" id="testr.runner.TestError">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">testr.runner.</span></span><span class="sig-name descname"><span class="pre">TestError</span></span><a class="reference internal" href="_modules/testr/runner.html#TestError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#testr.runner.TestError" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">testr.runner.</span></span><span class="sig-name descname"><span class="pre">TestError</span></span><a class="reference internal" href="_modules/testr/runner.html#TestError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#testr.runner.TestError" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -711,19 +711,15 @@ testing using run_testr.</p>
 that <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">test</span></code> runs tests via pytest.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="testr.setup_helper.PyTest">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">testr.setup_helper.</span></span><span class="sig-name descname"><span class="pre">PyTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dist</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/testr/setup_helper.html#PyTest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#testr.setup_helper.PyTest" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">testr.setup_helper.</span></span><span class="sig-name descname"><span class="pre">PyTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dist</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Distribution</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/testr/setup_helper.html#PyTest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#testr.setup_helper.PyTest" title="Link to this definition">¶</a></dt>
 <dd><p>Test runner command class suitable for use in <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> so
 that <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">test</span></code> runs tests via pytest.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="testr.setup_helper.PyTest.initialize_options">
 <span class="sig-name descname"><span class="pre">initialize_options</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/testr/setup_helper.html#PyTest.initialize_options"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#testr.setup_helper.PyTest.initialize_options" title="Link to this definition">¶</a></dt>
-<dd><p>Set default values for all the options that this command
-supports.  Note that these defaults may be overridden by other
-commands, by the setup script, by config files, or by the
-command-line.  Thus, this is not the place to code dependencies
-between options; generally, ‘initialize_options()’ implementations
-are just a bunch of “self.foo = None” assignments.</p>
-<p>This method must be implemented by all command classes.</p>
+<dd><p>Set or (reset) all options/attributes/caches used by the command
+to their default values. Note that these values may be overwritten during
+the build.</p>
 </dd></dl>
 
 </dd></dl>
@@ -861,7 +857,7 @@ on those subnets that do not have /proj/sot/ska on their filesystem).</p>
     <a href="#">Back to Top</a></p>
   <p>
     &copy; Copyright 2016, Tom Aldcroft.<br/>
-    Created using <a href="http://www.sphinx-doc.org/en/stable/">Sphinx</a> 8.1.3. &nbsp;
+    Created using <a href="http://www.sphinx-doc.org/en/stable/">Sphinx</a> 9.1.0. &nbsp;
   </p>
 </footer>
   </body>
